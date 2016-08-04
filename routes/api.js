@@ -7,7 +7,7 @@ router.get('/', function(req, res, next) {
 });
 
 router.post('/create-bum', function(req, res, next) {
-  console.log(req);
+  console.log(req.body);
   res.json({});
 });
 

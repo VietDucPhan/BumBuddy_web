@@ -14,7 +14,7 @@ BumsModel.getCollection = function () {
 BumsModel.get = function( callback){
   var Bums = BumsModel.getCollection();
   Bums.find(function(err,doc){
-    return callback(doc);
+    return callback(err,doc);
   });
 }
 

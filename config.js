@@ -1,5 +1,5 @@
 var config = {
-  db_url : process.env.MONGOLAB_URI,
+  db_url : process.env.MONGODB_URI,
   app_name : "SkaterProfile",
   session_secret : process.env.SESSION_SECRECTS,
   meta_desc: "",

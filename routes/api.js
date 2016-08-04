@@ -4,7 +4,7 @@ var BumsModel = require('../models/BumsModel');
 
 /* GET users listing. */
 
-router.get('/get-bum', function(req, res, next) {
+router.post('/get-bum', function(req, res, next) {
   BumsModel.get(function(err, respond){
     return res.json(respond);
   })

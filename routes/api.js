@@ -1,5 +1,6 @@
 var express = require('express');
 var router = express.Router();
+var BumsModel = require('../models/BumsModel');
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
@@ -7,8 +8,9 @@ router.get('/', function(req, res, next) {
 });
 
 router.post('/create-bum', function(req, res, next) {
-  console.log(req.body);
-  res.json({});
+  BumsModel.save(req.body, function(err, respond){
+    res.json(respond);
+  })
 });
 
 module.exports = router;

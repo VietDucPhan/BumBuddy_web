@@ -7,7 +7,9 @@
 var app = require('../app');
 var debug = require('debug')('bumbuddy_web:server');
 var http = require('http');
-
+var AppModel = require('../lib/Model');
+var Socket = require('../lib/Socket');
+require('events').EventEmitter.prototype._maxListeners = 0;
 /**
  * Get port from environment and store in Express.
  */
@@ -20,14 +22,21 @@ app.set('port', port);
  */
 
 var server = http.createServer(app);
-
+Socket.listen(server,function(){
+  console.log('Socket is on')
+})
 /**
  * Listen on provided port, on all network interfaces.
  */
+AppModel.init(server,function (error) {
+  if (error)
+    throw error;
 
-server.listen(port);
-server.on('error', onError);
-server.on('listening', onListening);
+
+  server.listen(port);
+  server.on('error', onError);
+  server.on('listening', onListening);
+});
 
 /**
  * Normalize a port into a number, string, or false.

@@ -12,7 +12,7 @@ var config = {
   smtppass: process.env.SMTP_PASS,
   smtphost: 'smtp.zoho.com',
   smtpport: 465,
-  fb_access_token: process.env.FB_ACCESS_TOKEN
+  imgur_access_token: process.env.IMGUR_ACCESS_TOKEN
 };
 
 module.exports = config;

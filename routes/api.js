@@ -3,8 +3,10 @@ var router = express.Router();
 var BumsModel = require('../models/BumsModel');
 
 /* GET users listing. */
-router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
+router.get('/get-bum', function(req, res, next) {
+  BumsModel.get(function(err, respond){
+    res.json(respond);
+  })
 });
 
 router.post('/create-bum', function(req, res, next) {

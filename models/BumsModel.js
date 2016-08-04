@@ -13,9 +13,9 @@ BumsModel.getCollection = function () {
 
 BumsModel.get = function( callback){
   var Bums = BumsModel.getCollection();
-  Bums.find({},function(err,doc){
-    return callback(err,doc);
-  });
+  Bums.aggregate([],{},function(err,cur){
+    return callback(err,cur)
+  })
 }
 
 BumsModel.save = function(data, callback){

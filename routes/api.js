@@ -5,8 +5,15 @@ var UsersModel = require('../models/UsersModel');
 
 /* GET users listing. */
 
+router.get('/get-bums', function(req, res, next) {
+  BumsModel.getAllBums(function(err, respond){
+    return res.json(respond);
+  })
+});
+
 router.get('/get-bum', function(req, res, next) {
-  BumsModel.get(function(err, respond){
+  console.log(req);
+  BumsModel.getBum(req.id,function(err, respond){
     return res.json(respond);
   })
 });

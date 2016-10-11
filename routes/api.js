@@ -11,7 +11,7 @@ router.get('/get-bums', function(req, res, next) {
   })
 });
 
-router.get('/get-bum', function(req, res, next) {
+router.post('/get-bum', function(req, res, next) {
   console.log(req);
   BumsModel.getBum(req.id,function(err, respond){
     return res.json(respond);

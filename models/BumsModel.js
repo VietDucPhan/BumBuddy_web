@@ -18,7 +18,7 @@ BumsModel.get = function( callback){
   })
 }
 
-BumsModel.save = function(data, callback){
+BumsModel.add = function(data, callback){
   var collection = BumsModel.getCollection();
   collection.save(data,function(err,status){
     if(!err){

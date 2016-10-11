@@ -12,9 +12,13 @@ router.get('/get-bums', function(req, res, next) {
 });
 
 router.post('/get-bum', function(req, res, next) {
-  console.log(req);
-  BumsModel.getBum(req.id,function(err, respond){
-    return res.json(respond);
+  BumsModel.getBum(req.body._id,function(err, respond){
+    if(err){
+      return res.json({status:true,content:respond});
+    } else {
+      return res.json({status:false,content:{msg:"something went wrong"}});
+    }
+
   })
 });
 
@@ -30,7 +34,7 @@ router.post('/login', function(req, res, next) {
     if(err){
       return res.json({status:true, content:respond});
     } else {
-      return res.json({status:false, msg:{content:"There is a bum in your ass"}});
+      return res.json({status:false, content:{msg:"something went wrong asshole"}});
     }
 
   })

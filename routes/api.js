@@ -22,6 +22,18 @@ router.post('/get-bum', function(req, res, next) {
   })
 });
 
+router.post('/like-bum', function(req, res, next) {
+  BumsModel.likeBum(req.body._id, req.body.userData,function(err, respond){
+    //console.log(respond);
+    if(err){
+      return res.json({status:true,content:respond});
+    } else {
+      return res.json({status:false,content:respond});
+    }
+
+  })
+});
+
 router.post('/create-bum', function(req, res, next) {
   BumsModel.add(req.body, function(err, respond){
     return res.json(respond);

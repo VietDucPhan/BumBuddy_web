@@ -36,7 +36,7 @@ router.post('/like-bum', function(req, res, next) {
 
 router.post('/create-bum', function(req, res, next) {
   BumsModel.add(req.body, function(err, respond){
-    return res.json(respond);
+    return res.json({status:err,content:respond});
   })
 
 });

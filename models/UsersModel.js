@@ -3,6 +3,7 @@
  */
 var AppModel = require('./../lib/Model');
 var ObjectID = require('mongodb').ObjectID;
+var Session = require('../lib/Session');
 
 
 var UsersModel = module.exports = {};
@@ -20,12 +21,21 @@ UsersModel.add = function(userData, callback){
   var Users = UsersModel.getCollection();
   if(userData.email  && userData.email != undefined && userData.email != null){
     UsersModel.getUserByEmail(userData.email,function(status, rec){
+      console.log("getUserByEmail",userData.email);
       if(status){
-        return callback(true,rec);
+        Session.encode(rec,function(token){
+          rec.token = token;
+          console.log(rec);
+          return callback(true, rec);
+        });
       } else {
         Users.save(userData,function(err,status){
           UsersModel.getUserByEmail(userData.email,function(status, rec){
-            return callback(true,rec);
+            Session.encode(rec,function(token){
+              rec.token = token;
+              console.log(rec);
+              return callback(true, rec);
+            });
           });
         });
       }

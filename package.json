@@ -15,6 +15,7 @@
     "serve-favicon": "~2.3.0",
     "mongodb":"~2.0.x",
     "connect-mongo" : "~0.8.x",
-    "async":"~2.0.x"
+    "async":"~2.0.x",
+    "jsonwebtoken":"~7.1.9" 
   }
 }

@@ -12,13 +12,8 @@ router.get('/get-bums', function(req, res, next) {
 });
 
 router.post('/get-bum', function(req, res, next) {
-  BumsModel.getBum(req.body._id,function(err, respond){
-    if(err){
-      return res.json({status:true,content:respond});
-    } else {
-      return res.json({status:false,content:{msg:"something went wrong"}});
-    }
-
+  BumsModel.getBum(req.body._id,function(respond){
+    return res.json(respond);
   })
 });
 
@@ -35,10 +30,9 @@ router.post('/like-bum', function(req, res, next) {
 });
 
 router.post('/create-bum', function(req, res, next) {
-  BumsModel.add(req.body, function(err, respond){
-    return res.json({status:err,content:respond});
+  BumsModel.add(req.body, function(respond){
+    return res.json(respond);
   })
-
 });
 
 router.post('/login', function(req, res, next) {

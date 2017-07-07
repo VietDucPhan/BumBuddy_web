@@ -18,16 +18,60 @@ BumsModel.getAllBums = function( callback){
   })
 }
 
-BumsModel.getBum = function(bumId, callback){
+BumsModel.getBum = function(_id, callback){
   var Bums = BumsModel.getCollection();
-  if(bumId && bumId != null && bumId != undefined){
-    Bums.findOne({_id:new ObjectID(bumId)}, function (err, rec) {
-        if (rec == null) {
-          return callback(false);
+  if(_id && _id != null && _id != undefined){
+    Bums.aggregate([
+      {$match:{_id:new ObjectID(_id)}},
+      {$unwind:"$comments"},
+      {$group:{
+        _id:"$_id",
+        name:{$first:"$name"},
+        address:{$first:"$address"},
+        coordinate:{$first:"$coordinate"},
+        zipcode:{$first:"$zipcode"},
+        average_overall_rating:{$avg:"$comments.overall_rating"},
+        "total_rates":{$sum:1},
+        "level1":{$sum:{$cond:[{$eq:["$comments.bum_rating","level1"]},1,0]}},
+        "level2":{$sum:{$cond:[{$eq:["$comments.bum_rating","level2"]},1,0]}},
+        "level3":{$sum:{$cond:[{$eq:["$comments.bum_rating","level3"]},1,0]}},
+        "level4":{$sum:{$cond:[{$eq:["$comments.bum_rating","level4"]},1,0]}},
+        "level5":{$sum:{$cond:[{$eq:["$comments.bum_rating","level5"]},1,0]}},
+      }},
+      {$project:{
+        average_overall_rating:{$floor:"$average_overall_rating"},
+        "address":1,
+        "total_rates":1,
+        "name":1,
+        coordinate:1,
+        zipcode:1,
+        "level1":1,
+        "level2":1,
+        "level3":1,
+        "level4":1,
+        "level5":1
+      }}
+    ]).toArray(function(err,documents){
+        console.log('BumsModel.getBum.err',err);
+        if (documents == null) {
+          return callback({
+            errors:
+            [
+              {
+                status:'s003',
+                source:{pointer:"models/BumsModel.getBum"},
+                title:"Bum not found",
+                detail:"This bum does not exist"
+              }
+            ]
+          });
         } else {
-          return callback(true, rec);
+          console.log('BumsModel.getBum.documents',documents);
+          return callback({
+            data:documents
+          });
         }
-      });
+    });
   }
 }
 
@@ -78,30 +122,46 @@ BumsModel.isLikedBum = function(bumId, userId, callback){
 
 BumsModel.add = function(data, callback){
   var collection = BumsModel.getCollection();
-  data.comments[0]._id = new ObjectID();
   var token = data.token;
-  console.log("BumsModel.add data", data);
   delete data.token;
   Session.verify(token,function(err,userDataDecoded){
-    console.log("BumsModel.add", userDataDecoded);
     delete userDataDecoded.iat;
     if(err){
-      data.links[0].uploaded_by = userDataDecoded;
-      data.comments[0].commentor = userDataDecoded;
-      data.comments[0].created_by = userDataDecoded;
-      collection.save(data,function(err,status){
+      data.created_by = userDataDecoded;
+      data.created_date = new Date();
+      collection.insert(data,function(err,status){
+        //console.log('BumsModel.add',status);
+        status.ops[0].type = "bum";
         if(!err){
-          if(status.result.nModified == 1){
-            return callback(true,{msg:"Bum was created",type:'success'})
-          } else {
-            return callback(true,{msg:"Congratulation, you have successfully created a bum",type:'success'})
-          }
+          return callback({
+            data:status.ops[0]
+          });
         } else {
-          return callback(false,{msg:"There is an error occured, Please try again latter",type:'warning'})
+          return callback({
+            errors:
+            [
+              {
+                status:'s002',
+                source:{pointer:"models/BumsModel.add"},
+                title:"Unknown collection error",
+                detail:"Error encouters while trying to save data to bums collection"
+              }
+            ]
+          });
         }
       });
     } else {
-      return callback(false,{msg:"Please login again",type:'warning'});
+      return callback({
+        errors:
+        [
+          {
+            status:'s001',
+            source:{pointer:"models/BumsModel.add"},
+            title:"User login required",
+            detail:"User need to login in order to create bum"
+          }
+        ]
+      });
     }
   });
 

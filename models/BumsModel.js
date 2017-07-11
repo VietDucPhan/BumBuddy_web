@@ -18,6 +18,57 @@ BumsModel.getAllBums = function( callback){
   })
 }
 
+BumsModel.getComments = function(_id, callback){
+  var Bums = BumsModel.getCollection();
+  if(_id && _id != null && _id != undefined){
+    Bums.aggregate([
+      {$match:{_id:new ObjectID(_id)}},
+      {$unwind:"$comments"},
+      {$group:{
+        _id:"$comments._id",
+        media:{$first:"$comments.media"},
+        description:{$first:"$comments.description"}
+      }},
+      {$project:{
+        media:1,
+        description:1
+      }}
+    ]).toArray(function(err,documents){
+        console.log('BumsModel.getBum.err',err);
+        if (documents == null) {
+          return callback({
+            errors:
+            [
+              {
+                status:'s003',
+                source:{pointer:"models/BumsModel.getBum"},
+                title:"Bum not found",
+                detail:"This bum does not exist"
+              }
+            ]
+          });
+        } else {
+          console.log('BumsModel.getBum.documents',documents);
+          return callback({
+            data:documents
+          });
+        }
+    });
+  } else {
+    return callback({
+      errors:
+      [
+        {
+          status:'s003',
+          source:{pointer:"models/BumsModel.getBum"},
+          title:"Bum not found",
+          detail:"This bum does not exist"
+        }
+      ]
+    });
+  }
+}
+
 BumsModel.getBum = function(_id, callback){
   var Bums = BumsModel.getCollection();
   if(_id && _id != null && _id != undefined){
@@ -71,6 +122,18 @@ BumsModel.getBum = function(_id, callback){
             data:documents
           });
         }
+    });
+  } else {
+    return callback({
+      errors:
+      [
+        {
+          status:'s003',
+          source:{pointer:"models/BumsModel.getBum"},
+          title:"Bum not found",
+          detail:"This bum does not exist"
+        }
+      ]
     });
   }
 }

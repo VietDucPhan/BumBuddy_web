@@ -17,6 +17,12 @@ router.post('/get-bum', function(req, res, next) {
   })
 });
 
+router.post('/get-comments', function(req, res, next) {
+  BumsModel.getComments(req.body._id,function(respond){
+    return res.json(respond);
+  })
+});
+
 router.post('/like-bum', function(req, res, next) {
   BumsModel.likeBum(req.body._id, req.body.userData,function(err, respond){
     //console.log(respond);

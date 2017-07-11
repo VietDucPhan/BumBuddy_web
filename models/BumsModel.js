@@ -24,14 +24,25 @@ BumsModel.getComments = function(_id, callback){
     Bums.aggregate([
       {$match:{_id:new ObjectID(_id)}},
       {$unwind:"$comments"},
+      {$unwind:"$comments.replies"},
       {$group:{
         _id:"$comments._id",
         media:{$first:"$comments.media"},
-        description:{$first:"$comments.description"}
+        description:{$first:"$comments.description"},
+        overall_rating:{$first:"$comments.overall_rating"},
+        bum_rating:{$first:"$comments.bum_rating"},
+        created_by:{$first:"$comments.created_by"},
+        created_date:{$first:"$comments.created_date"},
+        total_comments:{$sum:["$comments.replies"]}
       }},
       {$project:{
         media:1,
-        description:1
+        description:1,
+        overall_rating:1,
+        bum_rating:1,
+        created_by:1,
+        created_date:1,
+        total_comments:1
       }}
     ]).toArray(function(err,documents){
         console.log('BumsModel.getBum.err',err);

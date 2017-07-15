@@ -22,7 +22,7 @@ BumsModel.getBumComments = function(_id, callback){
   var Bums = BumsModel.getCollection();
   if(_id && _id != null && _id != undefined){
     Bums.aggregate([
-      {$match:{$and:[{_id:new ObjectID(_id)},{"$comments":{$ne:null}}]}},
+      {$match:{$and:[{_id:new ObjectID(_id)},{comments:{$ne:null}}]}},
       {$unwind:{
         path:"$comments",
         preserveNullAndEmptyArrays:true
@@ -91,7 +91,7 @@ BumsModel.getBumComments = function(_id, callback){
 BumsModel.getBumsComments = function(callback){
   var Bums = BumsModel.getCollection();
     Bums.aggregate([
-      {$match:{"$comments":{$ne:null}}},
+      {$match:{comments:{$ne:null}}},
       {$unwind:{
         path:"$comments",
         preserveNullAndEmptyArrays:true
@@ -150,7 +150,7 @@ BumsModel.getRating = function(_id, callback){
   var Bums = BumsModel.getCollection();
   if(_id && _id != null && _id != undefined){
     Bums.aggregate([
-      {$match:{$and:[{_id:new ObjectID(_id)},{"$comments":{$ne:null}}]}},
+      {$match:{$and:[{_id:new ObjectID(_id)},{comments:{$ne:null}}]}},
       {$unwind:{
         path:"$comments",
         preserveNullAndEmptyArrays:true

@@ -17,8 +17,14 @@ router.post('/get-rating', function(req, res, next) {
   })
 });
 
-router.post('/get-comments', function(req, res, next) {
-  BumsModel.getComments(req.body._id,function(respond){
+router.post('/get-bum-comments', function(req, res, next) {
+  BumsModel.getBumComments(req.body._id,function(respond){
+    return res.json(respond);
+  })
+});
+
+router.post('/get-bums-comments', function(req, res, next) {
+  BumsModel.getBumsComments(function(respond){
     return res.json(respond);
   })
 });

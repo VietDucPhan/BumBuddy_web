@@ -18,7 +18,7 @@ BumsModel.getAllBums = function( callback){
   })
 }
 
-BumsModel.getComments = function(_id, callback){
+BumsModel.getBumComments = function(_id, callback){
   var Bums = BumsModel.getCollection();
   if(_id && _id != null && _id != undefined){
     Bums.aggregate([
@@ -86,6 +86,63 @@ BumsModel.getComments = function(_id, callback){
       ]
     });
   }
+}
+
+BumsModel.getBumsComments = function(callback){
+  var Bums = BumsModel.getCollection();
+    Bums.aggregate([
+      {$unwind:{
+        path:"$comments",
+        preserveNullAndEmptyArrays:true
+      }},
+      {$unwind:{
+        path:"$comments.votes",
+        preserveNullAndEmptyArrays:true
+      }},
+      {$group:{
+        _id:"$comments._id",
+        name:{$first:"$name"},
+        media:{$first:"$comments.media"},
+        description:{$first:"$comments.description"},
+        overall_rating:{$first:"$comments.overall_rating"},
+        bum_rating:{$first:"$comments.bum_rating"},
+        created_by:{$first:"$comments.created_by"},
+        created_date:{$first:"$comments.created_date"},
+        total_replies:{$first:{$size:{ $ifNull: [ "$comments.replies", [] ] }}},
+        points:{$sum:"$comments.votes.vote"}
+      }},
+      {$project:{
+        name:1,
+        media:1,
+        description:1,
+        overall_rating:1,
+        bum_rating:1,
+        created_by:1,
+        created_date:1,
+        total_replies:1,
+        points:1
+      }}
+    ]).toArray(function(err,documents){
+        console.log('BumsModel.getBum.err',err);
+        if (documents == null) {
+          return callback({
+            errors:
+            [
+              {
+                status:'s003',
+                source:{pointer:"models/BumsModel.getBum"},
+                title:"Bum not found",
+                detail:err.message
+              }
+            ]
+          });
+        } else {
+          console.log('BumsModel.getBum.documents',documents);
+          return callback({
+            data:documents
+          });
+        }
+    });
 }
 
 BumsModel.getRating = function(_id, callback){

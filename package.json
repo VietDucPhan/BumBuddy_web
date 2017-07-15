@@ -13,9 +13,9 @@
     "pug": "~2.0.0-beta4",
     "morgan": "~1.6.1",
     "serve-favicon": "~2.3.0",
-    "mongodb":"~2.0.x",
+    "mongodb":"~2.2.x",
     "connect-mongo" : "~0.8.x",
     "async":"~2.0.x",
-    "jsonwebtoken":"~7.1.9" 
+    "jsonwebtoken":"~7.1.9"
   }
 }

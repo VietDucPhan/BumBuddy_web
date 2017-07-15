@@ -23,8 +23,14 @@ BumsModel.getComments = function(_id, callback){
   if(_id && _id != null && _id != undefined){
     Bums.aggregate([
       {$match:{_id:new ObjectID(_id)}},
-      {$unwind:"$comments"},
-      {$unwind:"$comments.replies"},
+      {$unwind:{
+        path:"$comments",
+        preserveNullAndEmptyArrays:true
+      }},
+      {$unwind:{
+        path:"$comments.votes",
+        preserveNullAndEmptyArrays:true
+      }},
       {$group:{
         _id:"$comments._id",
         media:{$first:"$comments.media"},
@@ -33,7 +39,8 @@ BumsModel.getComments = function(_id, callback){
         bum_rating:{$first:"$comments.bum_rating"},
         created_by:{$first:"$comments.created_by"},
         created_date:{$first:"$comments.created_date"},
-        total_comments:{$sum:["$comments.replies"]}
+        total_replies:{$first:{$size:{ $ifNull: [ "$comments.replies", [] ] }}},
+        points:{$sum:"$comments.votes.vote"}
       }},
       {$project:{
         media:1,
@@ -42,7 +49,8 @@ BumsModel.getComments = function(_id, callback){
         bum_rating:1,
         created_by:1,
         created_date:1,
-        total_comments:1
+        total_replies:1,
+        points:1
       }}
     ]).toArray(function(err,documents){
         console.log('BumsModel.getBum.err',err);
@@ -54,7 +62,7 @@ BumsModel.getComments = function(_id, callback){
                 status:'s003',
                 source:{pointer:"models/BumsModel.getBum"},
                 title:"Bum not found",
-                detail:"This bum does not exist"
+                detail:err.message
               }
             ]
           });
@@ -70,22 +78,25 @@ BumsModel.getComments = function(_id, callback){
       errors:
       [
         {
-          status:'s003',
+          status:'s004',
           source:{pointer:"models/BumsModel.getBum"},
-          title:"Bum not found",
-          detail:"This bum does not exist"
+          title:"id not found",
+          detail:"id not found"
         }
       ]
     });
   }
 }
 
-BumsModel.getBum = function(_id, callback){
+BumsModel.getRating = function(_id, callback){
   var Bums = BumsModel.getCollection();
   if(_id && _id != null && _id != undefined){
     Bums.aggregate([
       {$match:{_id:new ObjectID(_id)}},
-      {$unwind:"$comments"},
+      {$unwind:{
+        path:"$comments",
+        preserveNullAndEmptyArrays:true
+      }},
       {$group:{
         _id:"$_id",
         name:{$first:"$name"},
@@ -114,7 +125,7 @@ BumsModel.getBum = function(_id, callback){
         "level5":1
       }}
     ]).toArray(function(err,documents){
-        console.log('BumsModel.getBum.err',err);
+        //console.log('BumsModel.getBum.err',err);
         if (documents == null) {
           return callback({
             errors:
@@ -128,7 +139,7 @@ BumsModel.getBum = function(_id, callback){
             ]
           });
         } else {
-          console.log('BumsModel.getBum.documents',documents);
+          //console.log('BumsModel.getBum.documents',documents);
           return callback({
             data:documents
           });

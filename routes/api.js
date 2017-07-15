@@ -11,8 +11,8 @@ router.get('/get-bums', function(req, res, next) {
   })
 });
 
-router.post('/get-bum', function(req, res, next) {
-  BumsModel.getBum(req.body._id,function(respond){
+router.post('/get-rating', function(req, res, next) {
+  BumsModel.getRating(req.body._id,function(respond){
     return res.json(respond);
   })
 });

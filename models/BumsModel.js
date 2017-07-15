@@ -22,7 +22,7 @@ BumsModel.getBumComments = function(_id, callback){
   var Bums = BumsModel.getCollection();
   if(_id && _id != null && _id != undefined){
     Bums.aggregate([
-      {$match:{$and:[{_id:new ObjectID(_id)},{comments:{$ne:null}}]}},
+      {$match:{_id:new ObjectID(_id)}},
       {$unwind:{
         path:"$comments",
         preserveNullAndEmptyArrays:true
@@ -68,10 +68,17 @@ BumsModel.getBumComments = function(_id, callback){
             ]
           });
         } else {
-          console.log('BumsModel.getBum.documents',documents);
-          return callback({
-            data:documents
-          });
+          //console.log('BumsModel.getBum.documents',documents);
+          if(documents[0] && documents[0]._id && documents[0].created_by){
+            return callback({
+              data:documents
+            });
+          } else {
+            return callback({
+              data:[]
+            });
+          }
+
         }
     });
   } else {
@@ -140,9 +147,15 @@ BumsModel.getBumsComments = function(callback){
           });
         } else {
           console.log('BumsModel.getBum.documents',documents);
-          return callback({
-            data:documents
-          });
+          if(documents[0] && documents[0]._id && documents[0].created_by){
+            return callback({
+              data:documents
+            });
+          } else {
+            return callback({
+              data:[]
+            });
+          }
         }
     });
 }
@@ -151,7 +164,7 @@ BumsModel.getRating = function(_id, callback){
   var Bums = BumsModel.getCollection();
   if(_id && _id != null && _id != undefined){
     Bums.aggregate([
-      {$match:{$and:[{_id:new ObjectID(_id)},{comments:{$ne:null}}]}},
+      {$match:{_id:new ObjectID(_id)}},
       {$unwind:{
         path:"$comments",
         preserveNullAndEmptyArrays:true
@@ -162,8 +175,8 @@ BumsModel.getRating = function(_id, callback){
         address:{$first:"$address"},
         coordinate:{$first:"$coordinate"},
         zipcode:{$first:"$zipcode"},
-        average_overall_rating:{$avg:"$comments.overall_rating"},
-        "total_rates":{$sum:1},
+        average_overall_rating:{$avg:{ifNull:["$comments.overall_rating",0]}},
+        "total_rates":{$first:{$size:{ $ifNull: [ "$comments", [] ] }}},
         "level1":{$sum:{$cond:[{$eq:["$comments.bum_rating","level1"]},1,0]}},
         "level2":{$sum:{$cond:[{$eq:["$comments.bum_rating","level2"]},1,0]}},
         "level3":{$sum:{$cond:[{$eq:["$comments.bum_rating","level3"]},1,0]}},
@@ -273,6 +286,7 @@ BumsModel.add = function(data, callback){
     if(err){
       data.created_by = userDataDecoded;
       data.created_date = new Date();
+      //data.comments = [];
       collection.insert(data,function(err,status){
         //console.log('BumsModel.add',status);
         status.ops[0].type = "bum";

@@ -33,6 +33,7 @@ BumsModel.getBumComments = function(_id, callback){
       }},
       {$group:{
         _id:"$comments._id",
+        name:{$first:"$name"},
         media:{$first:"$comments.media"},
         description:{$first:"$comments.description"},
         overall_rating:{$first:"$comments.overall_rating"},
@@ -40,7 +41,7 @@ BumsModel.getBumComments = function(_id, callback){
         created_by:{$first:"$comments.created_by"},
         created_date:{$first:"$comments.created_date"},
         total_replies:{$first:{$size:{ $ifNull: [ "$comments.replies", [] ] }}},
-        points:{$sum:"$comments.votes.vote"}
+        points:{$sum:{ $ifNull: [ "$comments.votes.vote", 0 ] }}
       }},
       {$project:{
         media:1,
@@ -102,14 +103,14 @@ BumsModel.getBumsComments = function(callback){
       }},
       {$group:{
         _id:"$comments._id",
-        name:{$first:"$name"},
-        media:{$first:"$comments.media"},
-        description:{$first:"$comments.description"},
-        overall_rating:{$first:"$comments.overall_rating"},
-        bum_rating:{$first:"$comments.bum_rating"},
-        created_by:{$first:"$comments.created_by"},
-        created_date:{$first:"$comments.created_date"},
-        total_replies:{$first:{$size:{ $ifNull: [ "$comments.replies", [] ] }}},
+        name:"$name",
+        media:"$comments.media",
+        description:"$comments.description",
+        overall_rating:"$comments.overall_rating",
+        bum_rating:"$comments.bum_rating",
+        created_by:"$comments.created_by",
+        created_date:"$comments.created_date",
+        total_replies:{$size:{ $ifNull: [ "$comments.replies", [] ] }},
         points:{$sum:{ $ifNull: [ "$comments.votes.vote", 0 ] }}
       }},
       {$project:{

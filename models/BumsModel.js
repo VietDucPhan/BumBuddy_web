@@ -175,8 +175,8 @@ BumsModel.getRating = function(_id, callback){
         address:{$first:"$address"},
         coordinate:{$first:"$coordinate"},
         zipcode:{$first:"$zipcode"},
-        average_overall_rating:{$avg:{ifNull:["$comments.overall_rating",0]}},
-        "total_rates":{$first:{$size:{ $ifNull: [ "$comments", [] ] }}},
+        overall_rating:{$avg:{$sum:{ifNull:["$comments.overall_rating",0]}}},
+        "total_rates":{$sum:{$cond:[{$ifNull:["$comments.overall_rating",false]},1,0]}},
         "level1":{$sum:{$cond:[{$eq:["$comments.bum_rating","level1"]},1,0]}},
         "level2":{$sum:{$cond:[{$eq:["$comments.bum_rating","level2"]},1,0]}},
         "level3":{$sum:{$cond:[{$eq:["$comments.bum_rating","level3"]},1,0]}},
@@ -184,7 +184,7 @@ BumsModel.getRating = function(_id, callback){
         "level5":{$sum:{$cond:[{$eq:["$comments.bum_rating","level5"]},1,0]}},
       }},
       {$project:{
-        average_overall_rating:{$floor:"$average_overall_rating"},
+        average_overall_rating:{$floor:"$overall_rating"},
         "address":1,
         "total_rates":1,
         "name":1,
@@ -197,7 +197,7 @@ BumsModel.getRating = function(_id, callback){
         "level5":1
       }}
     ]).toArray(function(err,documents){
-        //console.log('BumsModel.getBum.err',err);
+        console.log('BumsModel.getBum.err',err);
         if (documents == null) {
           return callback({
             errors:
@@ -206,12 +206,12 @@ BumsModel.getRating = function(_id, callback){
                 status:'s003',
                 source:{pointer:"models/BumsModel.getBum"},
                 title:"Bum not found",
-                detail:"This bum does not exist"
+                detail:err.message
               }
             ]
           });
         } else {
-          //console.log('BumsModel.getBum.documents',documents);
+          console.log('BumsModel.getBum.documents',documents);
           return callback({
             data:documents
           });
@@ -275,6 +275,59 @@ BumsModel.isLikedBum = function(bumId, userId, callback){
         return callback(true, rec);
       }
   });
+}
+
+BumsModel.addComment = function(data, callback){
+  var collection = BumsModel.getCollection();
+  var token = data.token;
+  var _id = data._id;
+  delete data.token;
+  delete data._id;
+  Session.verify(token,function(err,userDataDecoded){
+    delete userDataDecoded.iat;
+    if(err){
+      data.created_by = userDataDecoded;
+      data.created_date = new Date();
+      data._id = new ObjectID();
+      //data.comments = [];
+      collection.update(
+        {_id:new ObjectID(_id)},
+        {$push: { "comments": data }},function(err,status){
+        console.log('BumsModel.addComment.err',err);
+        console.log('BumsModel.addComment.status',status);
+        if(!err){
+          return callback({
+            data:[]
+          });
+        } else {
+          return callback({
+            errors:
+            [
+              {
+                status:'s002',
+                source:{pointer:"models/BumsModel.add"},
+                title:"Unknown collection error",
+                detail:"Error encouters while trying to save data to bums collection"
+              }
+            ]
+          });
+        }
+      });
+    } else {
+      return callback({
+        errors:
+        [
+          {
+            status:'s001',
+            source:{pointer:"models/BumsModel.add"},
+            title:"User login required",
+            detail:"User need to login in order to create bum"
+          }
+        ]
+      });
+    }
+  });
+
 }
 
 BumsModel.add = function(data, callback){

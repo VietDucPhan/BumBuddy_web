@@ -110,6 +110,7 @@ BumsModel.getBumsComments = function(callback){
       }},
       {$group:{
         _id:"$comments._id",
+        bum_id:{$first:"$_id"},
         name:{$first:"$name"},
         media:{$first:"$comments.media"},
         description:{$first:"$comments.description"},
@@ -123,6 +124,7 @@ BumsModel.getBumsComments = function(callback){
       {$project:{
         name:1,
         media:1,
+        bum_id:1,
         description:1,
         overall_rating:1,
         bum_rating:1,
@@ -175,7 +177,7 @@ BumsModel.getRating = function(_id, callback){
         address:{$first:"$address"},
         coordinate:{$first:"$coordinate"},
         zipcode:{$first:"$zipcode"},
-        overall_rating:{$avg:{$sum:{ifNull:["$comments.overall_rating",0]}}},
+        overall_rating:{$sum:{$ifNull:["$comments.overall_rating",0]}},
         "total_rates":{$sum:{$cond:[{$ifNull:["$comments.overall_rating",false]},1,0]}},
         "level1":{$sum:{$cond:[{$eq:["$comments.bum_rating","level1"]},1,0]}},
         "level2":{$sum:{$cond:[{$eq:["$comments.bum_rating","level2"]},1,0]}},
@@ -184,7 +186,7 @@ BumsModel.getRating = function(_id, callback){
         "level5":{$sum:{$cond:[{$eq:["$comments.bum_rating","level5"]},1,0]}},
       }},
       {$project:{
-        average_overall_rating:{$floor:"$overall_rating"},
+        average_overall_rating:{$floor:{$cond:[{$eq:["$total_rates",0]},0,{$divide:["$overall_rating","$total_rates"]}]}},
         "address":1,
         "total_rates":1,
         "name":1,
@@ -297,7 +299,7 @@ BumsModel.addComment = function(data, callback){
         console.log('BumsModel.addComment.status',status);
         if(!err){
           return callback({
-            data:[]
+            data:[data]
           });
         } else {
           return callback({

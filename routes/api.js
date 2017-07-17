@@ -11,7 +11,7 @@ router.get('/get-bums', function(req, res, next) {
   })
 });
 
-router.post('/comment-bum', function(req, res, next) {
+router.post('/add-comment', function(req, res, next) {
   BumsModel.addComment(req.body,function(respond){
     return res.json(respond);
   })

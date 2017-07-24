@@ -34,6 +34,7 @@ BumsModel.getBumComments = function(_id, callback){
       {$group:{
         _id:"$comments._id",
         name:{$first:"$name"},
+        bum_id:{$first:"$_id"},
         media:{$first:"$comments.media"},
         description:{$first:"$comments.description"},
         overall_rating:{$first:"$comments.overall_rating"},
@@ -45,6 +46,7 @@ BumsModel.getBumComments = function(_id, callback){
       }},
       {$project:{
         media:1,
+        bum_id:1,
         description:1,
         overall_rating:1,
         bum_rating:1,
@@ -324,6 +326,66 @@ BumsModel.addComment = function(data, callback){
             source:{pointer:"models/BumsModel.add"},
             title:"User login required",
             detail:"User need to login in order to create bum"
+          }
+        ]
+      });
+    }
+  });
+
+}
+
+BumsModel.voteComment = function(data, callback){
+  var collection = BumsModel.getCollection();
+  var token = data.token;
+  var _id = data._id;
+  delete data.token;
+  delete data._id;
+  Session.verify(token,function(err,userDataDecoded){
+    delete userDataDecoded.iat;
+    if(err){
+      data.created_by = userDataDecoded;
+      data.created_date = new Date();
+      data._id = new ObjectID();
+      //data.comments = [];
+      collection.update(
+        {"comments._id":new ObjectID(_id)},
+        {$pull:{"comments.$.votes":{"created_by.email":data.created_by.email}}},
+        function(err,status){
+          collection.update(
+            {"comments._id":new ObjectID(_id)},
+            {$push: { "comments.$.votes": data }},function(err,status){
+            console.log('BumsModel.addComment.err',err);
+            console.log('BumsModel.addComment.status',status);
+            if(!err){
+              return callback({
+                data:[data]
+              });
+            } else {
+              return callback({
+                errors:
+                [
+                  {
+                    status:'s008',
+                    source:{pointer:"models/BumsModel.vote"},
+                    title:"Unknown collection error",
+                    detail:"Error encouters while trying to vote a comment"
+                  }
+                ]
+              });
+            }
+          });
+        }
+      );
+
+    } else {
+      return callback({
+        errors:
+        [
+          {
+            status:'s008',
+            source:{pointer:"models/BumsModel.vote"},
+            title:"User login required",
+            detail:"User need to login in order to vote comment"
           }
         ]
       });

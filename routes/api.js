@@ -17,6 +17,12 @@ router.post('/add-comment', function(req, res, next) {
   })
 });
 
+router.post('/vote-comment', function(req, res, next) {
+  BumsModel.voteComment(req.body,function(respond){
+    return res.json(respond);
+  })
+});
+
 router.post('/get-rating', function(req, res, next) {
   BumsModel.getRating(req.body._id,function(respond){
     return res.json(respond);

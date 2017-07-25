@@ -42,7 +42,9 @@ BumsModel.getBumComments = function(_id, callback){
         created_by:{$first:"$comments.created_by"},
         created_date:{$first:"$comments.created_date"},
         total_replies:{$first:{$size:{ $ifNull: [ "$comments.replies", [] ] }}},
-        points:{$sum:{ $ifNull: [ "$comments.votes.vote", 0 ] }}
+        points:{$sum:{ $ifNull: [ "$comments.votes.vote", 0 ] }},
+        upVote:{$addToSet:{$cond:[{$eq:["$comments.votes.vote",1]},"$comments.votes.created_by.email",null]}},
+        downVote:{$addToSet:{$cond:[{$eq:["$comments.votes.vote",-1]},"$comments.votes.created_by.email",null]}}
       }},
       {$project:{
         media:1,
@@ -53,7 +55,9 @@ BumsModel.getBumComments = function(_id, callback){
         created_by:1,
         created_date:1,
         total_replies:1,
-        points:1
+        points:1,
+        downVote:1,
+        upVote:1
       }}
     ]).toArray(function(err,documents){
         console.log('BumsModel.getBum.err',err);
@@ -121,7 +125,9 @@ BumsModel.getBumsComments = function(callback){
         created_by:{$first:"$comments.created_by"},
         created_date:{$first:"$comments.created_date"},
         total_replies:{$first:{$size:{ $ifNull: [ "$comments.replies", [] ] }}},
-        points:{$sum:{ $ifNull: [ "$comments.votes.vote", 0 ] }}
+        points:{$sum:{ $ifNull: [ "$comments.votes.vote", 0 ] }},
+        upVote:{$addToSet:{$cond:[{$eq:["$comments.votes.vote",1]},"$comments.votes.created_by.email",null]}},
+        downVote:{$addToSet:{$cond:[{$eq:["$comments.votes.vote",-1]},"$comments.votes.created_by.email",null]}}
       }},
       {$project:{
         name:1,
@@ -133,7 +139,9 @@ BumsModel.getBumsComments = function(callback){
         created_by:1,
         created_date:1,
         total_replies:1,
-        points:1
+        points:1,
+        upVote:1,
+        downVote:1
       }}
     ]).toArray(function(err,documents){
         console.log('BumsModel.getBum.err',err);

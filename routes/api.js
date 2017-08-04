@@ -17,6 +17,12 @@ router.post('/add-comment', function(req, res, next) {
   })
 });
 
+router.post('/add-reply', function(req, res, next) {
+  BumsModel.addReply(req.body,function(respond){
+    return res.json(respond);
+  })
+});
+
 router.post('/vote-comment', function(req, res, next) {
   BumsModel.voteComment(req.body,function(respond){
     return res.json(respond);

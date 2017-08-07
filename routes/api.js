@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var BumsModel = require('../models/BumsModel');
 var UsersModel = require('../models/UsersModel');
+var RepliesModel = require('../models/RepliesModel');
 
 /* GET users listing. */
 
@@ -18,7 +19,13 @@ router.post('/add-comment', function(req, res, next) {
 });
 
 router.post('/add-reply', function(req, res, next) {
-  BumsModel.addReply(req.body,function(respond){
+  RepliesModel.add(req.body,function(respond){
+    return res.json(respond);
+  })
+});
+
+router.post('/get-replies', function(req, res, next) {
+  RepliesModel.getReplies(req.body._id,function(respond){
     return res.json(respond);
   })
 });

@@ -41,7 +41,6 @@ BumsModel.getBumComments = function(_id, callback){
         bum_rating:{$first:"$comments.bum_rating"},
         created_by:{$first:"$comments.created_by"},
         created_date:{$first:"$comments.created_date"},
-        total_replies:{$first:{$size:{ $ifNull: [ "$comments.replies", [] ] }}},
         points:{$sum:{ $ifNull: [ "$comments.votes.vote", 0 ] }},
         upVote:{$addToSet:{$cond:[{$eq:["$comments.votes.vote",1]},"$comments.votes.created_by.email",null]}},
         downVote:{$addToSet:{$cond:[{$eq:["$comments.votes.vote",-1]},"$comments.votes.created_by.email",null]}}
@@ -54,7 +53,6 @@ BumsModel.getBumComments = function(_id, callback){
         bum_rating:1,
         created_by:1,
         created_date:1,
-        total_replies:1,
         points:1,
         downVote:1,
         upVote:1
@@ -124,7 +122,6 @@ BumsModel.getBumsComments = function(callback){
         bum_rating:{$first:"$comments.bum_rating"},
         created_by:{$first:"$comments.created_by"},
         created_date:{$first:"$comments.created_date"},
-        total_replies:{$first:{$size:{ $ifNull: [ "$comments.replies", [] ] }}},
         points:{$sum:{ $ifNull: [ "$comments.votes.vote", 0 ] }},
         upVote:{$addToSet:{$cond:[{$eq:["$comments.votes.vote",1]},"$comments.votes.created_by.email","Down Vote"]}},
         downVote:{$addToSet:{$cond:[{$eq:["$comments.votes.vote",-1]},"$comments.votes.created_by.email","Up Vote"]}}
@@ -138,7 +135,6 @@ BumsModel.getBumsComments = function(callback){
         bum_rating:1,
         created_by:1,
         created_date:1,
-        total_replies:1,
         points:1,
         upVote:1,
         downVote:1
@@ -341,57 +337,6 @@ BumsModel.addComment = function(data, callback){
   });
 }
 
-BumsModel.addReply = function(data, callback){
-  var collection = BumsModel.getCollection();
-  var token = data.token;
-  var _id = data._id;
-  delete data.token;
-  delete data._id;
-  Session.verify(token,function(err,userDataDecoded){
-    delete userDataDecoded.iat;
-    if(err){
-      data.created_by = userDataDecoded;
-      data.created_date = new Date();
-      data._id = new ObjectID();
-      //data.comments = [];
-      collection.update(
-        {"comments._id":new ObjectID(_id)},
-        {$push: { "comments.$.replies": data }},function(err,status){
-        console.log('BumsModel.addReply.err',err);
-        console.log('BumsModel.addReply.status',status);
-        if(!err){
-          return callback({
-            data:[data]
-          });
-        } else {
-          return callback({
-            errors:
-            [
-              {
-                status:'s002',
-                source:{pointer:"models/BumsModel.addReply"},
-                title:"Unknown collection error",
-                detail:"Error encouters while trying to reply a comment"
-              }
-            ]
-          });
-        }
-      });
-    } else {
-      return callback({
-        errors:
-        [
-          {
-            status:'s001',
-            source:{pointer:"models/BumsModel.add"},
-            title:"User login required",
-            detail:"User need to login in order to reply a comment"
-          }
-        ]
-      });
-    }
-  });
-}
 
 BumsModel.voteComment = function(data, callback){
   var collection = BumsModel.getCollection();

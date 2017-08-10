@@ -68,6 +68,7 @@ RepliesModel.add = function(data, callback){
     if(err){
       data.created_by = userDataDecoded;
       data.created_date = new Date();
+      data.published = true;
       //data.comments = [];
       collection.insert(data,function(err,status){
         if(!err){

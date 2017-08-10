@@ -24,6 +24,19 @@ router.post('/add-reply', function(req, res, next) {
   })
 });
 
+router.post('/report', function(req, res, next) {
+  if(req.body && req.body.typeOfReport === "comment"){
+    console.log("detect comment api",req.body);
+    BumsModel.reportComment(req.body,function(respond){
+      return res.json(respond);
+    })
+  } else if(req.body && req.body.typeOfReport === "bum"){
+    BumsModel.reportBum(req.body,function(respond){
+      return res.json(respond);
+    })
+  }
+});
+
 router.post('/get-replies', function(req, res, next) {
   RepliesModel.getReplies(req.body._id,function(respond){
     return res.json(respond);

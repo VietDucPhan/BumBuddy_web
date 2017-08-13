@@ -390,6 +390,60 @@ BumsModel.reportBum = function(data, callback){
 
 }
 
+BumsModel.deleteComment = function(data, callback){
+  var collection = BumsModel.getCollection();
+  var token = data.token;
+  var _id = data._id;
+  delete data.token;
+  Session.verify(token,function(err,userDataDecoded){
+    delete userDataDecoded.iat;
+    if(err){
+      data.created_by = userDataDecoded;
+      //data.comments = [];
+      collection.update(
+        {"comments._id":new ObjectID(_id)},
+        {$pull:{"comments":{
+          "_id":new ObjectID(_id),
+          "created_by.email":userDataDecoded.email
+        }}},
+        function(err,status){
+        if(!err){
+          console.log("deletecomment",status);
+          return callback({
+            data:[data]
+          });
+        } else {
+
+          return callback({
+            errors:
+            [
+              {
+                status:'s008',
+                source:{pointer:"models/BumsModel.vote"},
+                title:"Unknown collection error",
+                detail:"Error encouters while trying to vote a comment"
+              }
+            ]
+          });
+        }
+      });
+    } else {
+      return callback({
+        errors:
+        [
+          {
+            status:'s008',
+            source:{pointer:"models/BumsModel.vote"},
+            title:"User login required",
+            detail:"User need to login in order to vote comment"
+          }
+        ]
+      });
+    }
+  });
+
+}
+
 BumsModel.reportComment = function(data, callback){
   var collection = BumsModel.getCollection();
   var token = data.token;

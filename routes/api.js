@@ -34,6 +34,23 @@ router.post('/report', function(req, res, next) {
     BumsModel.reportBum(req.body,function(respond){
       return res.json(respond);
     })
+  } else if(req.body && req.body.typeOfReport === "reply"){
+    RepliesModel.report(req.body,function(respond){
+      return res.json(respond);
+    })
+  }
+});
+
+router.post('/delete', function(req, res, next) {
+  if(req.body && req.body.typeOfDelete === "comment"){
+    console.log("detect comment api",req.body);
+    BumsModel.deleteComment(req.body,function(respond){
+      return res.json(respond);
+    })
+  }else if(req.body && req.body.typeOfDelete === "reply"){
+    RepliesModel.delete(req.body,function(respond){
+      return res.json(respond);
+    })
   }
 });
 

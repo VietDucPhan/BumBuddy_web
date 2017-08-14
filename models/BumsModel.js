@@ -18,6 +18,57 @@ BumsModel.getAllBums = function( callback){
   })
 }
 
+BumsModel.centerSphere = function(data, callback){
+  var Bums = BumsModel.getCollection();
+  if(data && data != null && data != undefined){
+    Bums.find({coordinate: {
+      $geoWithin: {
+        $centerSphere: [ [ -122, 37 ], 90/3963.2 ]
+      } }}).toArray(function(err,documents){
+
+        if (documents == null) {
+          console.log('BumsModel.getBum.err',err);
+          return callback({
+            errors:
+            [
+              {
+                status:'s003',
+                source:{pointer:"models/BumsModel.getBum"},
+                title:"Bum not found",
+                detail:err.message
+              }
+            ]
+          });
+        } else {
+          //
+          if(documents[0] && documents[0]._id && documents[0].created_by){
+            console.log('BumsModel.getBum.centerSphere',documents);
+            return callback({
+              data:documents
+            });
+          } else {
+            return callback({
+              data:[]
+            });
+          }
+
+        }
+    });
+  } else {
+    return callback({
+      errors:
+      [
+        {
+          status:'s004',
+          source:{pointer:"models/BumsModel.getBum"},
+          title:"id not found",
+          detail:"id not found"
+        }
+      ]
+    });
+  }
+}
+
 BumsModel.getBumComments = function(_id, callback){
   var Bums = BumsModel.getCollection();
   if(_id && _id != null && _id != undefined){

@@ -24,6 +24,12 @@ router.post('/add-reply', function(req, res, next) {
   })
 });
 
+router.post('/get-surround-bum', function(req, res, next) {
+  BumsModel.centerSphere(req.body,function(respond){
+    return res.json(respond);
+  })
+});
+
 router.post('/report', function(req, res, next) {
   if(req.body && req.body.typeOfReport === "comment"){
     console.log("detect comment api",req.body);

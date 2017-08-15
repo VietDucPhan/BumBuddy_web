@@ -23,8 +23,8 @@ BumsModel.centerSphere = function(data, callback){
   if(data && data != null && data != undefined){
     Bums.find({coordinate: {
       $geoWithin: {
-        $centerSphere: [ [ -122, 37 ], 90/3963.2 ]
-      } }}).toArray(function(err,documents){
+        $centerSphere: [ data.coordinate, data.radius*0.621371192/3963.2 ]
+      } }}).project({name: 1, _id: 1 }).toArray(function(err,documents){
 
         if (documents == null) {
           console.log('BumsModel.getBum.err',err);
@@ -42,7 +42,7 @@ BumsModel.centerSphere = function(data, callback){
         } else {
           //
           if(documents[0] && documents[0]._id && documents[0].created_by){
-            console.log('BumsModel.getBum.centerSphere',documents);
+            //console.log('BumsModel.getBum.centerSphere',documents);
             return callback({
               data:documents
             });

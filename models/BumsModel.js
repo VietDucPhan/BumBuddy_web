@@ -42,8 +42,8 @@ BumsModel.centerSphere = function(data, callback){
           });
         } else {
           //
-          if(documents[0] && documents[0]._id && documents[0].created_by){
-            console.log('BumsModel.getBum.centerSphere',documents);
+          if(documents[0] && documents[0]._id){
+            //console.log('BumsModel.getBum.centerSphere',documents);
             return callback({
               data:documents
             });

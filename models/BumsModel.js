@@ -21,6 +21,7 @@ BumsModel.getAllBums = function( callback){
 BumsModel.centerSphere = function(data, callback){
   var Bums = BumsModel.getCollection();
   if(data && data != null && data != undefined){
+    console.log("centerSphere",data);
     Bums.find({coordinate: {
       $geoWithin: {
         $centerSphere: [ data.coordinate, data.radius*0.621371192/3963.2 ]

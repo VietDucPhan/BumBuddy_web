@@ -14,7 +14,7 @@ BumsModel.getCollection = function () {
 BumsModel.getAllBums = function( callback){
   var Bums = BumsModel.getCollection();
   Bums.aggregate([],{},function(err,cur){
-    return callback(err,cur)
+    return callback(err,cur);
   })
 }
 
@@ -125,15 +125,9 @@ BumsModel.getBumComments = function(_id, callback){
           });
         } else {
           //console.log('BumsModel.getBum.documents',documents);
-          if(documents[0] && documents[0]._id && documents[0].created_by){
             return callback({
               data:documents
             });
-          } else {
-            return callback({
-              data:[]
-            });
-          }
 
         }
     });
@@ -155,7 +149,7 @@ BumsModel.getBumComments = function(_id, callback){
 BumsModel.getBumsComments = function(callback){
   var Bums = BumsModel.getCollection();
     Bums.aggregate([
-      {$match:{comments:{$ne:null}}},
+      {$match:{comments:{$ne:null, $not: {$size: 0}}}},
       {$unwind:{
         path:"$comments",
         preserveNullAndEmptyArrays:true
@@ -207,15 +201,9 @@ BumsModel.getBumsComments = function(callback){
           });
         } else {
           console.log('BumsModel.getBum.documents',documents);
-          if(documents[0] && documents[0]._id && documents[0].created_by){
             return callback({
               data:documents
             });
-          } else {
-            return callback({
-              data:[]
-            });
-          }
         }
     });
 }

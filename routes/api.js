@@ -12,6 +12,12 @@ router.get('/get-bums', function(req, res, next) {
   })
 });
 
+router.post('/find-bum-name', function(req, res, next) {
+  BumsModel.findBumByText(req.body.name,function(respond){
+    return res.json(respond);
+  })
+});
+
 router.post('/add-comment', function(req, res, next) {
   BumsModel.addComment(req.body,function(respond){
     return res.json(respond);

@@ -18,6 +18,56 @@ BumsModel.getAllBums = function( callback){
   })
 }
 
+BumsModel.findBumByText = function(data, callback){
+  var Bums = BumsModel.getCollection();
+  if(data && data != null && data != undefined){
+    console.log("findBumByText",data);
+    var reg = new RegExp(data, "g");
+    Bums.find({name:{$regex:reg}}).project({name: 1, _id: 1 }).toArray(function(err,documents){
+
+        if (documents == null) {
+          console.log('BumsModel.getBum.err',err);
+          return callback({
+            errors:
+            [
+              {
+                status:'s003',
+                source:{pointer:"models/BumsModel.findBumByText"},
+                title:"Bum not found",
+                detail:err.message
+              }
+            ]
+          });
+        } else {
+          //
+          if(documents[0] && documents[0]._id){
+            console.log('BumsModel.getBum.findBumByText',documents);
+            return callback({
+              data:documents
+            });
+          } else {
+            return callback({
+              data:[]
+            });
+          }
+
+        }
+    });
+  } else {
+    return callback({
+      errors:
+      [
+        {
+          status:'s004',
+          source:{pointer:"models/BumsModel.getBum"},
+          title:"id not found",
+          detail:"id not found"
+        }
+      ]
+    });
+  }
+}
+
 BumsModel.centerSphere = function(data, callback){
   var Bums = BumsModel.getCollection();
   if(data && data != null && data != undefined){
@@ -25,7 +75,7 @@ BumsModel.centerSphere = function(data, callback){
     Bums.find({coordinate: {
       $geoWithin: {
         $centerSphere: [ data.coordinate, data.radius*0.621371192/3963.2 ]
-      } }}).project({name: 1, _id: 1 }).toArray(function(err,documents){
+      } }}).project({name: 1, _id: 1, coordinate:1 }).toArray(function(err,documents){
 
         if (documents == null) {
           console.log('BumsModel.getBum.err',err);

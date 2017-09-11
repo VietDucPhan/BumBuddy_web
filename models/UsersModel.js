@@ -18,6 +18,7 @@ UsersModel.getCollection = function () {
 * @return json Document of user.
 **/
 UsersModel.add = function(userData, callback){
+  var self = this;
   var Users = UsersModel.getCollection();
   if(userData.email  && userData.email != undefined && userData.email != null){
     UsersModel.getUserByEmail(userData.email,function(status, rec){
@@ -32,12 +33,16 @@ UsersModel.add = function(userData, callback){
           return callback(true, rec);
         });
       } else {
-        Users.save(userData,function(err,status){
-          UsersModel.getUserByEmail(userData.email,function(status, rec){
-            Session.encode(rec,function(token){
-              rec.token = token;
-              console.log(rec);
-              return callback(true, rec);
+        userData.username = userData.name.replace(/[^a-z0-9._-]/gi, '_').replace(/_{2,}/g, '_').toLowerCase();
+        self.createUserNameNotAlreadyExists(userData.username,function(username){
+          userData.username = username;
+          Users.save(userData,function(err,status){
+            UsersModel.getUserByEmail(userData.email,function(status, rec){
+              Session.encode(rec,function(token){
+                rec.token = token;
+                console.log(rec);
+                return callback(true, rec);
+              });
             });
           });
         });
@@ -95,6 +100,36 @@ UsersModel.update = function(token,data, callback){
   }
 };
 
+UsersModel.createUserNameNotAlreadyExists = function(username,callback){
+  var self = this;
+  UsersModel.isUserNameExists(username,function(response){
+    if(response){
+      var timestamp = Math.floor(Math.random() * 9) + 1  ;
+      UsersModel.createUserNameNotAlreadyExists(username+timestamp,function(respnoseCon){
+        if(respnoseCon){
+          return callback(respnoseCon);
+        }
+      });
+    } else {
+      return callback(username);
+    }
+  });
+}
+
+UsersModel.isUserNameExists = function(username, callback){
+  var Users = UsersModel.getCollection();
+  if(username != null && username != undefined){
+    Users.findOne({username:username}, function (err, rec) {
+        if (rec == undefined) {
+          return callback(false);
+        } else {
+          return callback(true);
+        }
+      });
+  } else {
+    return callback(false);
+  }
+};
 
 /**
 * Get user by email

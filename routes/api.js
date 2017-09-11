@@ -123,7 +123,12 @@ router.post('/login', function(req, res, next) {
     }
 
   })
+});
 
+router.post('/update-profile', function(req, res, next) {
+  UsersModel.update(req.body.token,req.body.data, function(respond){
+    return res.json(respond);
+  })
 });
 
 module.exports = router;

@@ -22,6 +22,9 @@ UsersModel.add = function(userData, callback){
   if(userData.email  && userData.email != undefined && userData.email != null){
     UsersModel.getUserByEmail(userData.email,function(status, rec){
       console.log("getUserByEmail",userData.email);
+      userData.settings = {
+        radius:2
+      };
       if(status){
         Session.encode(rec,function(token){
           rec.token = token;
@@ -42,6 +45,53 @@ UsersModel.add = function(userData, callback){
     });
   } else {
     return callback(false);
+  }
+};
+
+UsersModel.update = function(token,data, callback){
+  var Users = UsersModel.getCollection();
+  if(token != null && token != undefined){
+    Session.verify(token,function(err,userDataDecoded){
+      delete userDataDecoded.iat;
+      if(err){
+        Users.findOneAndUpdate({_id:new ObjectID(userDataDecoded._id)},{$set:data},{returnOriginal:false}, function (err, rec) {
+          if (rec == undefined) {
+            return callback({
+              errors:
+              [
+                {
+                  status:'s002',
+                  source:{pointer:"models/UsersModel.update"},
+                  title:"Unknown collection error",
+                  detail:"Could not update profile"
+                }
+              ]
+            });
+          } else {
+            var record = rec.value;
+            Session.encode(record,function(token){
+              record.token = token;
+              console.log(rec);
+              return callback({data:[record]});
+            });
+          }
+        });
+      }
+    });
+
+
+  } else {
+    return callback({
+      errors:
+      [
+        {
+          status:'s002',
+          source:{pointer:"models/UsersModel.update"},
+          title:"Unknown collection error",
+          detail:"Could not update profile"
+        }
+      ]
+    });
   }
 };
 

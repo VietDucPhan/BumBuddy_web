@@ -125,6 +125,12 @@ router.post('/login', function(req, res, next) {
   })
 });
 
+router.post('/logout', function(req, res, next) {
+  UsersModel.updateExistigDeviceID(req.body, false, function(err, respond){
+      return res.json({status:true});
+  })
+});
+
 router.post('/update-profile', function(req, res, next) {
   UsersModel.update(req.body.token,req.body.data, function(respond){
     return res.json(respond);

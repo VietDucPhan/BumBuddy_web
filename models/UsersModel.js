@@ -27,20 +27,33 @@ UsersModel.add = function(userData, callback){
         radius:2
       };
       if(status){
-        Session.encode(rec,function(token){
-          rec.token = token;
-          console.log(rec);
-          return callback(true, rec);
+        self.updateExistigDeviceID(userData,true,function(response){
+          if(response && response.errors){
+            return callback(false);
+          } else {
+            Session.encode(response,function(token){
+              rec.token = token;
+              console.log(rec);
+              return callback(true, rec);
+            });
+          }
         });
+
       } else {
         userData.username = userData.name.replace(/[^a-z0-9._-]/gi, '_').replace(/_{2,}/g, '_').toLowerCase();
         self.createUserNameNotAlreadyExists(userData.username,function(username){
           userData.username = username;
+          if(userData.device_token){
+            userData.push_token = userData.device_token;
+            delete userData.device_token;
+          }
           Users.save(userData,function(err,status){
             UsersModel.getUserByEmail(userData.email,function(status, rec){
+              if(rec && rec.push_token){
+                delete rec.push_token;
+              }
               Session.encode(rec,function(token){
                 rec.token = token;
-                console.log(rec);
                 return callback(true, rec);
               });
             });
@@ -52,6 +65,51 @@ UsersModel.add = function(userData, callback){
     return callback(false);
   }
 };
+
+UsersModel.updateExistigDeviceID = function(userData, flag, callback){
+  var self = this;
+  var Users = UsersModel.getCollection();
+  self.getUserByEmail(userData.email,function(status, rec){
+    if(status && userData && userData.device_token){
+      if(!flag){
+        userData.device_token.token = null
+      }
+      Users.findOneAndUpdate(
+        {email:rec.email}
+      ,{$set:{push_token:userData.device_token}},{returnOriginal:false},function(err,rec){
+        if (rec == undefined) {
+          return callback({
+            errors:
+            [
+              {
+                status:'s008',
+                source:{pointer:"models/UsersModel.updateExistigDeviceID"},
+                title:"Unknown collection error",
+                detail:"Could not update device token"
+              }
+            ]
+          });
+        } else {
+          var record = rec.value;
+          delete record.push_token;
+          return callback(record);
+        }
+      });
+    } else {
+      return callback({
+        errors:
+        [
+          {
+            status:'s008',
+            source:{pointer:"models/UsersModel.updateExistigDeviceID"},
+            title:"Unknown collection error",
+            detail:"Could not update device token"
+          }
+        ]
+      });
+    }
+  });
+}
 
 UsersModel.update = function(token,data, callback){
   var Users = UsersModel.getCollection();

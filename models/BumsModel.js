@@ -2,6 +2,7 @@
  * Created by Administrator on 5/29/2015.
  */
 var AppModel = require('./../lib/Model');
+var Notification = require('./../lib/Notification');
 var ObjectID = require('mongodb').ObjectID;
 var Session = require('../lib/Session');
 
@@ -342,6 +343,7 @@ BumsModel.likeBum = function(bumId, userData, callback){
             {"likes._id":userData._id}
           ]
         }, [], {$pull: {likes:{_id:userData._id}}}, {new: true}, function (err, updatedDoc) {
+
           return callback(false, updatedDoc.value);
         });
 
@@ -608,6 +610,12 @@ BumsModel.voteComment = function(data, callback){
             {$push: { "comments.$.votes": data }},function(err,status){
             console.log('BumsModel.addComment.err',err);
             console.log('BumsModel.addComment.status',status);
+            Notification.sendNotice(data.created_by._id,data.created_by._id,{notification: {
+    title: "$GOOG up 1.43% on the day",
+    body: "$GOOG gained 11.80 points to close at 835.67, up 1.43% on the day."
+  }},function(){
+
+            })
             if(!err){
               return callback({
                 data:[data]

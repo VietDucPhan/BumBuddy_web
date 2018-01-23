@@ -12,7 +12,8 @@ var config = {
   smtppass: process.env.SMTP_PASS,
   smtphost: 'smtp.zoho.com',
   smtpport: 465,
-  imgur_access_token: process.env.IMGUR_ACCESS_TOKEN
+  imgur_access_token: process.env.IMGUR_ACCESS_TOKEN,
+  push_notification_key: process.env.NOTIFICATION_SERVER_KEY
 };
 
 module.exports = config;

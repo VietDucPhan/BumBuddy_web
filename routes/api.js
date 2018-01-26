@@ -96,6 +96,12 @@ router.post('/get-bums-comments', function(req, res, next) {
   })
 });
 
+router.post('/get-comment', function(req, res, next) {
+  BumsModel.getComment(req.body._id,function(respond){
+    return res.json(respond);
+  })
+});
+
 router.post('/like-bum', function(req, res, next) {
   BumsModel.likeBum(req.body._id, req.body.userData,function(err, respond){
     //console.log(respond);

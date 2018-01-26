@@ -176,9 +176,86 @@ BumsModel.getBumComments = function(_id, callback){
           });
         } else {
           //console.log('BumsModel.getBum.documents',documents);
+
             return callback({
               data:documents
             });
+
+        }
+    });
+  } else {
+    return callback({
+      errors:
+      [
+        {
+          status:'s004',
+          source:{pointer:"models/BumsModel.getBum"},
+          title:"id not found",
+          detail:"id not found"
+        }
+      ]
+    });
+  }
+}
+
+BumsModel.getComment = function(_id, callback){
+  var Bums = BumsModel.getCollection();
+  if(_id && _id != null && _id != undefined){
+    Bums.aggregate([
+      {$match:{"comments._id":new ObjectID(_id)}},
+      {$project:{
+        comment: {
+           '$filter': {
+               input: '$comments',
+               as: 'comments',
+               cond: { $eq: ['$$comments._id', new ObjectID(_id)] }
+            }
+         }
+      }}
+    ]).toArray(function(err,documents){
+        console.log('BumsModel.getBum.err',err);
+        if (documents == null) {
+          return callback({
+            errors:
+            [
+              {
+                status:'s003',
+                source:{pointer:"models/BumsModel.getBum"},
+                title:"Bum not found",
+                detail:err.message
+              }
+            ]
+          });
+        } else {
+          //console.log('BumsModel.getBum.documents',documents);
+          var returnDocument = {
+            _id:documents[0].comment[0]._id,
+            media:documents[0].comment[0].media,
+            bum_id:documents[0]._id,
+            description:documents[0].comment[0].description,
+            overall_rating:documents[0].comment[0].overall_rating,
+            created_by:documents[0].comment[0].created_by,
+            created_date:documents[0].comment[0].created_date,
+            points:0,
+            upVote:[],
+            downVote:[]
+          };
+          if(documents[0] && documents[0].comment && documents[0].comment[0] && documents[0].comment[0].votes){
+            for(i=0;i < documents[0].comment[0].votes.length; i++){
+              if(documents[0].comment[0].votes[i].vote === 1){
+                returnDocument.upVote.push(documents[0].comment[0].votes[i].created_by.email);
+              }
+              if(documents[0].comment[0].votes[i].vote === -1){
+                returnDocument.downVote.push(documents[0].comment[0].votes[i].created_by.email);
+              }
+              if(documents[0].comment[0].votes[i].vote){
+                returnDocument.points += documents[0].comment[0].votes[i].vote;
+              }
+            }
+          }
+          return callback({
+            data:[returnDocument]
+          });
 
         }
     });
@@ -605,21 +682,36 @@ BumsModel.voteComment = function(data, callback){
         {"comments._id":new ObjectID(_id)},
         {$pull:{"comments.$.votes":{"created_by.email":data.created_by.email}}},
         function(err,status){
-          collection.update(
+          collection.findOneAndUpdate(
             {"comments._id":new ObjectID(_id)},
-            {$push: { "comments.$.votes": data }},function(err,status){
-            console.log('BumsModel.addComment.err',err);
-            console.log('BumsModel.addComment.status',status);
-            Notification.sendNotice(data.created_by._id,data.created_by._id,{notification: {
-    title: "$GOOG up 1.43% on the day",
-    body: "$GOOG gained 11.80 points to close at 835.67, up 1.43% on the day."
-  }},function(){
+            {$push: { "comments.$.votes": data }},{returnOriginal:false},function(err,documents){
+            console.log('BumsModel.voteComment.err',err);
+            console.log('BumsModel.voteComment.documents',documents);
 
-            })
             if(!err){
-              return callback({
-                data:[data]
+              var type = "downvoted";
+              if(data.vote > 0){
+                type = "upvoted";
+              }
+              Notification.getCommentCreatorByCommentID(_id, function(result){
+                console.log("BumsModel getCommentCreatorByCommentID",result);
+                Notification.add(userDataDecoded, result.data, type, null, _id, function(response){
+                  if(response && response.data){
+                    console.log("Notification.add", response);
+                    Notification.sendNotice(response.data,function(flag){
+                      return callback({
+                        data:[data]
+                      });
+                    });
+                  } else {
+                    console.log("could not create notification");
+                    return callback({
+                      data:[data]
+                    });
+                  }
+                });
               });
+
             } else {
               return callback({
                 errors:

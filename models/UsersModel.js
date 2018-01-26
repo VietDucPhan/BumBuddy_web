@@ -189,6 +189,21 @@ UsersModel.isUserNameExists = function(username, callback){
   }
 };
 
+UsersModel.getDevicePushToken = function(userID, callback){
+  var self = this;
+  var Users = UsersModel.getCollection();
+  if(userID && userID != undefined){
+    Users.findOne({_id:new ObjectID(userID)}, function (err, rec) {
+        if (rec == undefined) {
+          return callback(false);
+        } else {
+
+          return callback(true, rec.push_token);
+        }
+      });
+  }
+}
+
 /**
 * Get user by email
 * @return boolean True on there is a user, false otherwise

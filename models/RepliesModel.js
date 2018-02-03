@@ -4,6 +4,8 @@
 var AppModel = require('./../lib/Model');
 var ObjectID = require('mongodb').ObjectID;
 var Session = require('../lib/Session');
+var Notification = require('./../lib/Notification');
+
 
 var RepliesModel = module.exports = {};
 
@@ -173,10 +175,35 @@ RepliesModel.add = function(data, callback){
       data.created_date = new Date();
       data.published = true;
       //data.comments = [];
+
       collection.insert(data,function(err,status){
         if(!err){
-          return callback({
-            data:status.ops[0]
+          Notification.getCommentCreatorByCommentID(data.comment_id, function(result){
+            console.log("BumsModel getCommentCreatorByCommentID",result);
+            Notification.add(userDataDecoded, result.data, "replied", {description:data.description,mentioned:data.mentioned}, data.comment_id, function(response){
+              if(response && response.data){
+                console.log("Notification.add", response);
+                Notification.sendNotice(response.data,function(flag){
+                  if(data.mentioned.length > 0){
+                    Notification.sendMentionedNotices(response.data,function(flag){
+                      return callback({
+                        data:status.ops[0]
+                      });
+                    });
+                  } else {
+                    return callback({
+                      data:status.ops[0]
+                    });
+                  }
+
+                });
+              } else {
+                console.log("could not create notification");
+                return callback({
+                  data:status.ops[0]
+                });
+              }
+            });
           });
         } else {
           return callback({

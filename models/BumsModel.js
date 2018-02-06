@@ -14,7 +14,9 @@ BumsModel.getCollection = function () {
 
 BumsModel.getAllBums = function( callback){
   var Bums = BumsModel.getCollection();
-  Bums.aggregate([],{},function(err,cur){
+  Bums.aggregate([
+    {$sort: {_id: 1} }
+  ],{},function(err,cur){
     return callback(err,cur);
   })
 }
@@ -121,11 +123,13 @@ BumsModel.centerSphere = function(data, callback){
   }
 }
 
-BumsModel.getBumComments = function(_id, callback){
+BumsModel.getBumComments = function(data, callback){
   var Bums = BumsModel.getCollection();
-  if(_id && _id != null && _id != undefined){
+  console.log("getBumComments",data);
+  if(data && data._id != null && data._id != undefined){
     Bums.aggregate([
-      {$match:{_id:new ObjectID(_id)}},
+
+      {$match:{_id:new ObjectID(data._id)}},
       {$unwind:{
         path:"$comments",
         preserveNullAndEmptyArrays:true
@@ -134,6 +138,7 @@ BumsModel.getBumComments = function(_id, callback){
         path:"$comments.votes",
         preserveNullAndEmptyArrays:true
       }},
+
       {$group:{
         _id:"$comments._id",
         name:{$first:"$name"},
@@ -159,7 +164,11 @@ BumsModel.getBumComments = function(_id, callback){
         points:1,
         downVote:1,
         upVote:1
-      }}
+      }},
+      {$sort: {_id: -1} },
+      {$skip:data.skip},
+      {$limit: data.limit},
+
     ]).toArray(function(err,documents){
         console.log('BumsModel.getBum.err',err);
         if (documents == null) {
@@ -274,9 +283,11 @@ BumsModel.getComment = function(_id, callback){
   }
 }
 
-BumsModel.getBumsComments = function(callback){
-  var Bums = BumsModel.getCollection();
+BumsModel.getBumsComments = function(data, callback){
+    var Bums = BumsModel.getCollection();
+    console.log("getBumsComments.data",data);
     Bums.aggregate([
+
       {$match:{comments:{$ne:null, $not: {$size: 0}}}},
       {$unwind:{
         path:"$comments",
@@ -286,6 +297,7 @@ BumsModel.getBumsComments = function(callback){
         path:"$comments.votes",
         preserveNullAndEmptyArrays:true
       }},
+
       {$group:{
         _id:"$comments._id",
         bum_id:{$first:"$_id"},
@@ -312,7 +324,10 @@ BumsModel.getBumsComments = function(callback){
         points:1,
         upVote:1,
         downVote:1
-      }}
+      }},
+      {$sort: {_id: -1} },
+      {$skip:data.skip},
+      {$limit: data.limit},
     ]).toArray(function(err,documents){
         console.log('BumsModel.getBum.err',err);
         if (documents == null) {

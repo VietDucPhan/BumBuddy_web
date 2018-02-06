@@ -85,13 +85,14 @@ router.post('/get-rating', function(req, res, next) {
 });
 
 router.post('/get-bum-comments', function(req, res, next) {
-  BumsModel.getBumComments(req.body._id,function(respond){
+  BumsModel.getBumComments(req.body.data,function(respond){
     return res.json(respond);
   })
 });
 
 router.post('/get-bums-comments', function(req, res, next) {
-  BumsModel.getBumsComments(function(respond){
+  BumsModel.getBumsComments(req.body.data, function(respond){
+    console.log("get-bums-comments",req.body.data);
     return res.json(respond);
   })
 });

@@ -286,9 +286,7 @@ BumsModel.getComment = function(_id, callback){
 BumsModel.getBumsComments = function(data, callback){
     var Bums = BumsModel.getCollection();
     console.log("getBumsComments.data",data);
-    Bums.aggregate([
-
-      {$match:{comments:{$ne:null, $not: {$size: 0}}}},
+    var aggregateObject = [
       {$unwind:{
         path:"$comments",
         preserveNullAndEmptyArrays:true
@@ -309,8 +307,8 @@ BumsModel.getBumsComments = function(data, callback){
         created_by:{$first:"$comments.created_by"},
         created_date:{$first:"$comments.created_date"},
         points:{$sum:{ $ifNull: [ "$comments.votes.vote", 0 ] }},
-        upVote:{$addToSet:{$cond:[{$eq:["$comments.votes.vote",1]},"$comments.votes.created_by.email","Down Vote"]}},
-        downVote:{$addToSet:{$cond:[{$eq:["$comments.votes.vote",-1]},"$comments.votes.created_by.email","Up Vote"]}}
+        upVote:{$addToSet:{$cond:[{$eq:["$comments.votes.vote",1]},"$comments.votes.created_by.email",null]}},
+        downVote:{$addToSet:{$cond:[{$eq:["$comments.votes.vote",-1]},"$comments.votes.created_by.email",null]}}
       }},
       {$project:{
         name:1,
@@ -327,8 +325,17 @@ BumsModel.getBumsComments = function(data, callback){
       }},
       {$sort: {_id: -1} },
       {$skip:data.skip},
-      {$limit: data.limit},
-    ]).toArray(function(err,documents){
+      {$limit: data.limit}
+    ];
+
+    if(data.bum_id){
+      aggregateObject.unshift({$match:{"comments._id":new ObjectID(data.bum_id)}});
+    } else if(data.user_id){
+      aggregateObject.unshift({$match:{"comments.created_by._id":data.user_id}});
+    } else {
+      aggregateObject.unshift({$match:{comments:{$ne:null, $not: {$size: 0}}}});
+    }
+    Bums.aggregate(aggregateObject).toArray(function(err,documents){
         console.log('BumsModel.getBum.err',err);
         if (documents == null) {
           return callback({

@@ -329,7 +329,7 @@ BumsModel.getBumsComments = function(data, callback){
     ];
 
     if(data.bum_id){
-      aggregateObject.unshift({$match:{"comments._id":new ObjectID(data.bum_id)}});
+      aggregateObject.unshift({$match:{_id:new ObjectID(data.bum_id)}});
     } else if(data.user_id){
       aggregateObject.unshift({$match:{"comments.created_by._id":data.user_id}});
     } else {

@@ -179,7 +179,7 @@ RepliesModel.add = function(data, callback){
       collection.insert(data,function(err,status){
         if(!err){
           Notification.getCommentCreatorByCommentID(data.comment_id, function(result){
-            console.log("BumsModel getCommentCreatorByCommentID",result);
+            //console.log("BumsModel getCommentCreatorByCommentID",result);
             Notification.add(userDataDecoded, result.data, "replied", {description:data.description,mentioned:data.mentioned}, data.comment_id, function(response){
               if(response && response.data){
                 console.log("Notification.add", response);

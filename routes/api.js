@@ -3,6 +3,7 @@ var router = express.Router();
 var BumsModel = require('../models/BumsModel');
 var UsersModel = require('../models/UsersModel');
 var RepliesModel = require('../models/RepliesModel');
+var CommentsModel = require('../models/CommentsModel');
 
 /* GET users listing. */
 
@@ -19,7 +20,7 @@ router.post('/find-bum-name', function(req, res, next) {
 });
 
 router.post('/add-comment', function(req, res, next) {
-  BumsModel.addComment(req.body,function(respond){
+  CommentsModel.add(req.body,function(respond){
     return res.json(respond);
   })
 });
@@ -39,7 +40,7 @@ router.post('/get-surround-bum', function(req, res, next) {
 router.post('/report', function(req, res, next) {
   if(req.body && req.body.typeOfReport === "comment"){
     console.log("detect comment api",req.body);
-    BumsModel.reportComment(req.body,function(respond){
+    CommentsModel.reportComment(req.body,function(respond){
       return res.json(respond);
     })
   } else if(req.body && req.body.typeOfReport === "bum"){
@@ -73,13 +74,13 @@ router.post('/get-replies', function(req, res, next) {
 });
 
 router.post('/vote-comment', function(req, res, next) {
-  BumsModel.voteComment(req.body,function(respond){
+  CommentsModel.voteComment(req.body,function(respond){
     return res.json(respond);
   })
 });
 
 router.post('/get-rating', function(req, res, next) {
-  BumsModel.getRating(req.body._id,function(respond){
+  CommentsModel.getRating(req.body._id,function(respond){
     return res.json(respond);
   })
 });
@@ -91,7 +92,7 @@ router.post('/get-bum-comments', function(req, res, next) {
 });
 
 router.post('/get-bums-comments', function(req, res, next) {
-  BumsModel.getBumsComments(req.body.data, function(respond){
+  CommentsModel.getComments(req.body.data, function(respond){
     console.log("get-bums-comments",req.body.data);
     return res.json(respond);
   })

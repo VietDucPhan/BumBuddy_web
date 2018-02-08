@@ -122,7 +122,7 @@ RepliesModel.getReplies = function(_id, callback){
     Replies.find(
       {"comment_id":_id}
     ).toArray(function(err,documents){
-        console.log('BumsModel.getBum.err',err);
+        //console.log('BumsModel.getBum.err',err);
         if (documents == null) {
           return callback({
             errors:
@@ -136,7 +136,7 @@ RepliesModel.getReplies = function(_id, callback){
             ]
           });
         } else {
-          console.log('BumsModel.getReplies.documents',documents);
+          //console.log('BumsModel.getReplies.documents',documents);
           if(documents[0] && documents[0]._id && documents[0].created_by){
             return callback({
               data:documents
@@ -178,31 +178,9 @@ RepliesModel.add = function(data, callback){
 
       collection.insert(data,function(err,status){
         if(!err){
-          Notification.getCommentCreatorByCommentID(data.comment_id, function(result){
-            //console.log("BumsModel getCommentCreatorByCommentID",result);
-            Notification.add(userDataDecoded, result.data, "replied", {description:data.description,mentioned:data.mentioned}, data.comment_id, function(response){
-              if(response && response.data){
-                console.log("Notification.add", response);
-                Notification.sendNotice(response.data,function(flag){
-                  if(data.mentioned.length > 0){
-                    Notification.sendMentionedNotices(response.data,function(flag){
-                      return callback({
-                        data:status.ops[0]
-                      });
-                    });
-                  } else {
-                    return callback({
-                      data:status.ops[0]
-                    });
-                  }
-
-                });
-              } else {
-                console.log("could not create notification");
-                return callback({
-                  data:status.ops[0]
-                });
-              }
+          Notification.sendPushNotificationReply(userDataDecoded,{description:data.description,mentioned:data.mentioned}, data.comment_id, function(result){
+            return callback({
+              data:status.ops[0]
             });
           });
         } else {

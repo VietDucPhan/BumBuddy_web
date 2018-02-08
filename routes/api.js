@@ -57,7 +57,7 @@ router.post('/report', function(req, res, next) {
 router.post('/delete', function(req, res, next) {
   if(req.body && req.body.typeOfDelete === "comment"){
     console.log("detect comment api",req.body);
-    BumsModel.deleteComment(req.body,function(respond){
+    CommentsModel.deleteComment(req.body,function(respond){
       return res.json(respond);
     })
   }else if(req.body && req.body.typeOfDelete === "reply"){
@@ -99,7 +99,7 @@ router.post('/get-bums-comments', function(req, res, next) {
 });
 
 router.post('/get-comment', function(req, res, next) {
-  BumsModel.getComment(req.body._id,function(respond){
+  CommentsModel.getComment(req.body._id,function(respond){
     return res.json(respond);
   })
 });

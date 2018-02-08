@@ -15,6 +15,7 @@ CommentsModel.getCollection = function () {
 
 CommentsModel.getRating = function(_id, callback){
   var Comments = CommentsModel.getCollection();
+  var Bums = AppModel.db.collection('bums');
   if(_id && _id != null && _id != undefined){
     Comments.aggregate([
       {$match:{"bum._id":_id}},
@@ -57,9 +58,35 @@ CommentsModel.getRating = function(_id, callback){
           });
         } else {
           console.log('BumsModel.getBum.documents',documents);
-          return callback({
-            data:documents
-          });
+          if(documents && documents[0]){
+            return callback({
+              data:documents
+            });
+          } else {
+            Bums.aggregate([
+              {$match:{_id:new ObjectID(_id)}},
+              {$project:{
+                name:1,
+                address:1,
+              }}
+            ]).toArray(function(err,documents){
+              return callback({
+                data:[{
+                  _id:documents[0]._id,
+                  name:documents[0].name,
+                  address:documents[0].address,
+                  total_rates:0,
+                  average_overall_rating:0,
+                  level1:0,
+                  level2:0,
+                  level3:0,
+                  level4:0,
+                  level5:0
+                }]
+              });
+            });
+          }
+
         }
     });
   } else {
@@ -91,9 +118,60 @@ CommentsModel.reportComment = function(data, callback){
       data._id = new ObjectID();
       //data.comments = [];
       collection.update(
-        {"bum._id":new ObjectID(_id)},
+        {_id:new ObjectID(_id)},
         {$push: { "reports": data }},function(err,status){
         if(!err){
+          return callback({
+            data:[data]
+          });
+        } else {
+
+          return callback({
+            errors:
+            [
+              {
+                status:'s008',
+                source:{pointer:"models/BumsModel.vote"},
+                title:"Unknown collection error",
+                detail:"Error encouters while trying to vote a comment"
+              }
+            ]
+          });
+        }
+      });
+    } else {
+      return callback({
+        errors:
+        [
+          {
+            status:'s008',
+            source:{pointer:"models/BumsModel.vote"},
+            title:"User login required",
+            detail:"User need to login in order to vote comment"
+          }
+        ]
+      });
+    }
+  });
+
+}
+
+
+CommentsModel.deleteComment = function(data, callback){
+  var collection = CommentsModel.getCollection();
+  var token = data.token;
+  var _id = data._id;
+  delete data.token;
+  Session.verify(token,function(err,userDataDecoded){
+    delete userDataDecoded.iat;
+    if(err){
+      data.created_by = userDataDecoded;
+      //data.comments = [];
+      collection.remove(
+        {_id:new ObjectID(_id)},
+        function(err,status){
+        if(!err){
+          console.log("deletecomment",status);
           return callback({
             data:[data]
           });
@@ -153,19 +231,11 @@ CommentsModel.voteComment = function(data, callback){
             console.log('BumsModel.voteComment.documents',documents);
 
             if(!err){
-              var type = "downvoted";
-              if(data.vote > 0){
-                type = "upvoted";
-              }
-              Notification.getCommentCreatorByCommentID(_id, function(result){
-                console.log("BumsModel getCommentCreatorByCommentID",result);
-                Notification.add(userDataDecoded, result.data, type, null, _id, function(response){
-                  if(response && response.data){
-                    console.log("Notification.add", response);
-                    Notification.sendNotice(response.data,function(flag){
-                      return callback({
-                        data:[data]
-                      });
+                Notification.sendPushNotificationVote(userDataDecoded, data.vote, _id, function(response){
+                  if(response){
+
+                    return callback({
+                      data:[data]
                     });
                   } else {
                     console.log("could not create notification");
@@ -174,7 +244,6 @@ CommentsModel.voteComment = function(data, callback){
                     });
                   }
                 });
-              });
 
             } else {
               return callback({
@@ -216,7 +285,7 @@ CommentsModel.getComment = function(_id, callback){
     Comments.aggregate([
       {$match:{_id:new ObjectID(_id)}},
     ]).toArray(function(err,documents){
-        console.log('BumsModel.getBum.err',err);
+        console.log('CommentsModel.getComment',documents);
         if (documents == null) {
           return callback({
             errors:
@@ -230,13 +299,27 @@ CommentsModel.getComment = function(_id, callback){
             ]
           });
         } else {
+          var returnDocument = {
+            _id:documents[0]._id,
+            media:documents[0].media,
+            bum_id:documents[0].bum._id,
+            name:documents[0].bum.name,
+            address:documents[0].bum.address,
+            description:documents[0].description,
+            overall_rating:documents[0].overall_rating,
+            created_by:documents[0].created_by,
+            created_date:documents[0].created_date,
+            points:0,
+            upVote:[],
+            downVote:[]
+          };
           if(documents[0] && documents[0].votes){
             for(i=0;i < documents[0].votes.length; i++){
               if(documents[0].votes[i].vote === 1){
-                documents.upVote.push(documents[0].votes[i].created_by.email);
+                returnDocument.upVote.push(documents[0].votes[i].created_by.email);
               }
               if(documents[0].votes[i].vote === -1){
-                documents.downVote.push(documents[0].votes[i].created_by.email);
+                returnDocument.downVote.push(documents[0].votes[i].created_by.email);
               }
               if(documents[0].votes[i].vote){
                 returnDocument.points += documents[0].votes[i].vote;
@@ -244,7 +327,7 @@ CommentsModel.getComment = function(_id, callback){
             }
           }
           return callback({
-            data:documents
+            data:[returnDocument]
           });
 
         }

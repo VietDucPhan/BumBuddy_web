@@ -25,6 +25,13 @@ router.post('/add-comment', function(req, res, next) {
   })
 });
 
+router.post('/get-user-notifications', function(req, res, next) {
+  UsersModel.getUserNotifications(req.body._id,function(respond){
+    return res.json(respond);
+  })
+});
+
+
 router.post('/add-reply', function(req, res, next) {
   RepliesModel.add(req.body,function(respond){
     return res.json(respond);

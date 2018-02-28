@@ -4,6 +4,7 @@
 var AppModel = require('./../lib/Model');
 var ObjectID = require('mongodb').ObjectID;
 var Session = require('../lib/Session');
+var Notification = require('./../lib/Notification');
 
 
 var UsersModel = module.exports = {};
@@ -65,6 +66,14 @@ UsersModel.add = function(userData, callback){
     return callback(false);
   }
 };
+
+UsersModel.getUserNotifications = function(_id, callback){
+  Notification.getNotificationsFromTOByID(_id,function(result){
+    return callback({
+      data:result
+    })
+  });
+}
 
 UsersModel.updateExistigDeviceID = function(userData, flag, callback){
   var self = this;

@@ -31,6 +31,12 @@ router.post('/get-user-notifications', function(req, res, next) {
   })
 });
 
+router.post('/get-userprofile', function(req, res, next) {
+  UsersModel.getUserProfile(req.body._id,function(respond){
+    return res.json(respond);
+  })
+});
+
 
 router.post('/add-reply', function(req, res, next) {
   RepliesModel.add(req.body,function(respond){

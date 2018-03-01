@@ -75,6 +75,39 @@ UsersModel.getUserNotifications = function(_id, callback){
   });
 }
 
+UsersModel.getUserProfile = function(_id, callback){
+  var Users = UsersModel.getCollection();
+  Users.aggregate([
+    {$match:{_id:new ObjectID(_id)}},
+    {$project:{
+      username:1,
+      profile_picture:1
+    }}
+  ]).toArray(function(err,documents){
+      console.log('BumsModel.getBum.err',err);
+      if (documents == null) {
+        return callback({
+          errors:
+          [
+            {
+              status:'s003',
+              source:{pointer:"models/BumsModel.getBum"},
+              title:"Bum not found",
+              detail:err.message
+            }
+          ]
+        });
+      } else {
+        //console.log('BumsModel.getBum.documents',documents);
+
+          return callback({
+            data:documents
+          });
+
+      }
+  });
+}
+
 UsersModel.updateExistigDeviceID = function(userData, flag, callback){
   var self = this;
   var Users = UsersModel.getCollection();

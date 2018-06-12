@@ -10,4 +10,12 @@ router.get('/', function(req, res, next) {
 
 });
 
+router.get('/privacy', function(req, res, next) {
+  return res.render('privacy', { title: 'Bum Buddy'});
+});
+
+router.get('/terms', function(req, res, next) {
+	return res.render('terms', { title: 'Bum Buddy'});
+});
+
 module.exports = router;

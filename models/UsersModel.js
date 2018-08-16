@@ -5,6 +5,7 @@ var AppModel = require('./../lib/Model');
 var ObjectID = require('mongodb').ObjectID;
 var Session = require('../lib/Session');
 var Notification = require('./../lib/Notification');
+var Request = require('request');
 
 
 var UsersModel = module.exports = {};
@@ -18,45 +19,74 @@ UsersModel.getCollection = function () {
 * @return boolean true on there is a document returned, false otherwise
 * @return json Document of user.
 **/
-UsersModel.add = function(userData, callback){
+UsersModel.login = function(userData, callback){
   var self = this;
-  var Users = UsersModel.getCollection();
-  if(userData.email  && userData.email != undefined && userData.email != null){
-    UsersModel.getUserByEmail(userData.email,function(status, rec){
-      console.log("getUserByEmail",userData.email);
+  var UsersCollection = UsersModel.getCollection();
+  if(userData  && userData.accessToken){
+    if(userData.type == 'google'){
+      Request.get('https://www.googleapis.com/oauth2/v3/tokeninfo?access_token='+userData.accessToken, function (err, response, body) {
+        gglReponse = JSON.parse(body);
+        if(gglReponse && gglReponse.email){
+          userData.email = gglReponse.email;
+          UsersModel.add(userData,function(status,res){
+            if(status){
+              return callback({data:[res]});
+            } else {
+              return callback({
+                errors:
+                [
+                  {
+                    source:{pointer:"models/BumsModel.login"},
+                    title:"Could not login please try again later",
+                    detail:"Could not login please try again later"
+                  }
+                ]
+              });
+            }
+          });
+        }
+      })
+    } else if(userData.type == 'facebook'){
+
+    } else {
+
+    }
+    
+  } else {
+    return callback(false);
+  }
+};
+
+UsersModel.add = function(data, callback){
+  var self = this;
+  if(data && data.email){
+    UsersModel.getUserByEmail(data.email,function(status, rec){
+      //console.log("getUserByEmail",userData.email);
       userData.settings = {
         radius:2
       };
       if(status){
-        self.updateExistigDeviceID(userData,true,function(response){
-          if(response && response.errors){
-            return callback(false);
-          } else {
-            Session.encode(response,function(token){
-              rec.token = token;
-              console.log(rec);
-              return callback(true, rec);
-            });
-          }
+        if(data.push_token){
+          self.updatePushToken(data.push_token);
+        }
+        delete rec.push_token;
+        Session.encode(rec,function(token){
+          rec.token = token;
+          //console.log(rec);
+          return callback(true,rec);
         });
-
       } else {
-        userData.username = userData.name.replace(/[^a-z0-9._-]/gi, '_').replace(/_{2,}/g, '_').toLowerCase();
+        var username = data.email.split('@');
+        data.username = username[0];//data.name.replace(/[^a-z0-9._-]/gi, '_').replace(/_{2,}/g, '_').toLowerCase();
         self.createUserNameNotAlreadyExists(userData.username,function(username){
-          userData.username = username;
-          if(userData.device_token){
-            userData.push_token = userData.device_token;
-            delete userData.device_token;
-          }
-          Users.save(userData,function(err,status){
-            UsersModel.getUserByEmail(userData.email,function(status, rec){
-              if(rec && rec.push_token){
-                delete rec.push_token;
-              }
-              Session.encode(rec,function(token){
-                rec.token = token;
-                return callback(true, rec);
-              });
+          data.username = username;
+          Users.save(data,function(err,status){
+            if(data && data.push_token){
+              delete data.push_token;
+            }
+            Session.encode(data,function(token){
+              data.token = token;
+              return callback(true,data);
             });
           });
         });
@@ -65,7 +95,7 @@ UsersModel.add = function(userData, callback){
   } else {
     return callback(false);
   }
-};
+}
 
 UsersModel.getUserNotifications = function(_id, callback){
   Notification.getNotificationsFromTOByID(_id,function(result){
@@ -108,7 +138,22 @@ UsersModel.getUserProfile = function(_id, callback){
   });
 }
 
-UsersModel.updateExistigDeviceID = function(userData, flag, callback){
+UsersModel.updatePushToken = function(data){
+  var self = this;
+  var UsersCollection = UsersModel.getCollection();
+  if(data && data.email && data.push_token){
+    UsersCollection.findOneAndUpdate(
+        {email:data.email}
+      ,{$set:{push_token:data.push_token}},{returnOriginal:false},function(err,rec){
+        return true;
+      });
+  } else {
+    return false;
+  }
+  
+}
+
+UsersModel.updateExistingDeviceID = function(userData, flag, callback){
   var self = this;
   var Users = UsersModel.getCollection();
   self.getUserByEmail(userData.email,function(status, rec){

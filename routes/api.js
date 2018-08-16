@@ -136,13 +136,8 @@ router.post('/create-bum', function(req, res, next) {
 });
 
 router.post('/login', function(req, res, next) {
-  UsersModel.add(req.body, function(err, respond){
-    if(err){
-      return res.json({status:true, content:respond});
-    } else {
-      return res.json({status:false, content:{msg:"something went wrong asshole"}});
-    }
-
+  UsersModel.login(req.body, function(err, respond){
+    return res.json(respond);
   })
 });
 

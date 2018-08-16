@@ -33,6 +33,7 @@ UsersModel.login = function(userData, callback){
               return callback({data:[res]});
             } else {
               return callback({
+                msg:"Could not login please try again later",
                 errors:
                 [
                   {
@@ -62,7 +63,7 @@ UsersModel.add = function(data, callback){
   if(data && data.email){
     UsersModel.getUserByEmail(data.email,function(status, rec){
       //console.log("getUserByEmail",userData.email);
-      userData.settings = {
+      data.settings = {
         radius:2
       };
       if(status){

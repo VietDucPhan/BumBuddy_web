@@ -68,7 +68,7 @@ UsersModel.add = function(data, callback){
       };
       if(status){
         if(data.push_token){
-          self.updatePushToken(data.push_token);
+          self.updatePushToken(data);
         }
         delete rec.push_token;
         Session.encode(rec,function(token){

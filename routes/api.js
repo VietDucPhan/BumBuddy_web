@@ -136,7 +136,7 @@ router.post('/create-bum', function(req, res, next) {
 });
 
 router.post('/login', function(req, res, next) {
-  UsersModel.login(req.body, function(respond){
+  UsersModel.login(req.body, function( respond){
     return res.json(respond);
   })
 });

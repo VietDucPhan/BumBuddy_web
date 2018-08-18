@@ -22,6 +22,7 @@ UsersModel.getCollection = function () {
 UsersModel.login = function(userData, callback){
   var self = this;
   var UsersCollection = UsersModel.getCollection();
+  console.log(userData);
   if(userData  && userData.accessToken){
     if(userData.type == 'google'){
       Request.get('https://www.googleapis.com/oauth2/v3/tokeninfo?access_token='+userData.accessToken, function (err, response, body) {
@@ -79,7 +80,7 @@ UsersModel.add = function(data, callback){
       } else {
         var username = data.email.split('@');
         data.username = username[0];//data.name.replace(/[^a-z0-9._-]/gi, '_').replace(/_{2,}/g, '_').toLowerCase();
-        self.createUserNameNotAlreadyExists(userData.username,function(username){
+        self.createUserNameNotAlreadyExists(data.username,function(username){
           data.username = username;
           Users.save(data,function(err,status){
             if(data && data.push_token){

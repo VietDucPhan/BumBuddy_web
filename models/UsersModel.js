@@ -47,11 +47,45 @@ UsersModel.login = function(userData, callback){
             }
           });
         }
-      })
+      });
     } else if(userData.type == 'facebook'){
-
+      Request.get('https://graph.facebook.com/v2.9/me?access_token='+userData.accessToken+'&fields=id,name,email,picture', function (err, response, body) {
+        fcResponse = JSON.parse(body);
+        if(fcResponse && fcResponse.email){
+          userData.email = fcResponse.email;
+          userData.name = fcResponse.name;
+          userData.profile_picture = fcResponse && fcResponse.picture && fcResponse.picture.data ? {secure_url:responseJson.picture.data.url} : null,
+          UsersModel.add(userData,function(status,res){
+            if(status){
+              return callback({data:[res]});
+            } else {
+              return callback({
+                msg:"Could not login please try again later",
+                errors:
+                [
+                  {
+                    source:{pointer:"models/BumsModel.login"},
+                    title:"Could not login please try again later",
+                    detail:"Could not login please try again later"
+                  }
+                ]
+              });
+            }
+          });
+        }
+      });
     } else {
-
+      return callback({
+        msg:"Could not login please try again later",
+        errors:
+        [
+          {
+            source:{pointer:"models/BumsModel.login"},
+            title:"Could not login please try again later",
+            detail:"Could not login please try again later"
+          }
+        ]
+      });
     }
     
   } else {

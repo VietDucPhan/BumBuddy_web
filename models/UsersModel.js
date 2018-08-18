@@ -62,6 +62,7 @@ UsersModel.login = function(userData, callback){
 UsersModel.add = function(data, callback){
   var self = this;
   if(data && data.email){
+    var UsersCollection = UsersModel.getCollection();
     UsersModel.getUserByEmail(data.email,function(status, rec){
       //console.log("getUserByEmail",userData.email);
       data.settings = {
@@ -82,7 +83,7 @@ UsersModel.add = function(data, callback){
         data.username = username[0];//data.name.replace(/[^a-z0-9._-]/gi, '_').replace(/_{2,}/g, '_').toLowerCase();
         self.createUserNameNotAlreadyExists(data.username,function(username){
           data.username = username;
-          Users.save(data,function(err,status){
+          UsersCollection.save(data,function(err,status){
             if(data && data.push_token){
               delete data.push_token;
             }

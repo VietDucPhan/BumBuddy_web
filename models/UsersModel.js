@@ -2,6 +2,7 @@
  * Created by Administrator on 5/29/2015.
  */
 var AppModel = require('./../lib/Model');
+var Fetch = require('./../lib/Fetch');
 var ObjectID = require('mongodb').ObjectID;
 var Session = require('../lib/Session');
 var Notification = require('./../lib/Notification');
@@ -24,8 +25,7 @@ UsersModel.login = function(userData, callback){
   var UsersCollection = UsersModel.getCollection();
   if(userData  && userData.accessToken){
     if(userData.type == 'google'){
-      Request.get('https://www.googleapis.com/oauth2/v3/tokeninfo?access_token='+userData.accessToken, function (err, response, body) {
-        gglReponse = JSON.parse(body);
+      Fetch.getGoogleProfile(userData.accessToken,function(gglReponse){
         delete userData.accessToken;
         if(gglReponse && gglReponse.email){
           userData.email = gglReponse.email;
@@ -49,8 +49,7 @@ UsersModel.login = function(userData, callback){
         }
       });
     } else if(userData.type == 'facebook'){
-      Request.get('https://graph.facebook.com/v2.9/me?access_token='+userData.accessToken+'&fields=id,name,email,picture', function (err, response, body) {
-        fcResponse = JSON.parse(body);
+      Fetch.getFacebookProfile(userData.accessToken,function(fcResponse){
         if(fcResponse && fcResponse.email){
           delete userData.accessToken;
           userData.email = fcResponse.email;
@@ -89,9 +88,18 @@ UsersModel.login = function(userData, callback){
       });
     }
     
-  } else {
-    return callback(false);
   }
+  return callback({
+      msg:"Could not login please try again later",
+      errors:
+      [
+        {
+          source:{pointer:"models/BumsModel.login"},
+          title:"Could not login please try again later",
+          detail:"Could not login please try again later"
+        }
+      ]
+    });
 };
 
 UsersModel.add = function(data, callback){
@@ -104,10 +112,11 @@ UsersModel.add = function(data, callback){
         radius:2
       };
       if(status){
-        if(data.push_token){
+        if(data.push_token != rec.push_token){
           self.updatePushToken(data);
         }
         delete rec.push_token;
+        
         Session.encode(rec,function(token){
           rec.token = token;
           //console.log(rec);
@@ -245,6 +254,7 @@ UsersModel.update = function(token,data, callback){
         Users.findOneAndUpdate({_id:new ObjectID(userDataDecoded._id)},{$set:data},{returnOriginal:false}, function (err, rec) {
           if (rec == undefined) {
             return callback({
+              msg:'Could not update profile',
               errors:
               [
                 {
@@ -253,13 +263,13 @@ UsersModel.update = function(token,data, callback){
                   title:"Unknown collection error",
                   detail:"Could not update profile"
                 }
-              ]
+              ],
+              showMessage:true
             });
           } else {
             var record = rec.value;
             Session.encode(record,function(token){
               record.token = token;
-              console.log(rec);
               return callback({data:[record]});
             });
           }
@@ -270,15 +280,17 @@ UsersModel.update = function(token,data, callback){
 
   } else {
     return callback({
+      msg:'User not login',
       errors:
       [
         {
           status:'s002',
           source:{pointer:"models/UsersModel.update"},
-          title:"Unknown collection error",
+          title:"No token",
           detail:"Could not update profile"
         }
-      ]
+      ],
+      showMessage:true
     });
   }
 };

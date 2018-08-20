@@ -55,7 +55,7 @@ UsersModel.login = function(userData, callback){
           delete userData.accessToken;
           userData.email = fcResponse.email;
           userData.name = fcResponse.name;
-          userData.profile_picture = fcResponse && fcResponse.picture && fcResponse.picture.data ? {secure_url:responseJson.picture.data.url} : null;
+          userData.profile_picture = fcResponse && fcResponse.picture && fcResponse.picture.data ? {secure_url:fcResponse.picture.data.url} : null;
           UsersModel.add(userData,function(status,res){
             if(status){
               return callback({data:[res]});

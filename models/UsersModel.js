@@ -39,7 +39,7 @@ UsersModel.login = function(userData, callback){
                 [
                   {
                     source:{pointer:"models/BumsModel.login"},
-                    title:"Could not login please try again later",
+                    title:"Could not login with google",
                     detail:"Could not login please try again later"
                   }
                 ]
@@ -65,7 +65,7 @@ UsersModel.login = function(userData, callback){
                 [
                   {
                     source:{pointer:"models/BumsModel.login"},
-                    title:"Could not login please try again later",
+                    title:"Could not login with facebook",
                     detail:"Could not login please try again later"
                   }
                 ]
@@ -81,7 +81,7 @@ UsersModel.login = function(userData, callback){
         [
           {
             source:{pointer:"models/BumsModel.login"},
-            title:"Could not login please try again later",
+            title:"Undefined data type",
             detail:"Could not login please try again later"
           }
         ]
@@ -95,7 +95,7 @@ UsersModel.login = function(userData, callback){
       [
         {
           source:{pointer:"models/BumsModel.login"},
-          title:"Could not login please try again later",
+          title:"Undefined accessToken",
           detail:"Could not login please try again later"
         }
       ]

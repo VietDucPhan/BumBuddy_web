@@ -22,11 +22,11 @@ UsersModel.getCollection = function () {
 UsersModel.login = function(userData, callback){
   var self = this;
   var UsersCollection = UsersModel.getCollection();
-  console.log(userData);
   if(userData  && userData.accessToken){
     if(userData.type == 'google'){
       Request.get('https://www.googleapis.com/oauth2/v3/tokeninfo?access_token='+userData.accessToken, function (err, response, body) {
         gglReponse = JSON.parse(body);
+        delete userData.accessToken;
         if(gglReponse && gglReponse.email){
           userData.email = gglReponse.email;
           UsersModel.add(userData,function(status,res){
@@ -52,9 +52,10 @@ UsersModel.login = function(userData, callback){
       Request.get('https://graph.facebook.com/v2.9/me?access_token='+userData.accessToken+'&fields=id,name,email,picture', function (err, response, body) {
         fcResponse = JSON.parse(body);
         if(fcResponse && fcResponse.email){
+          delete userData.accessToken;
           userData.email = fcResponse.email;
           userData.name = fcResponse.name;
-          userData.profile_picture = fcResponse && fcResponse.picture && fcResponse.picture.data ? {secure_url:responseJson.picture.data.url} : null,
+          userData.profile_picture = fcResponse && fcResponse.picture && fcResponse.picture.data ? {secure_url:responseJson.picture.data.url} : null;
           UsersModel.add(userData,function(status,res){
             if(status){
               return callback({data:[res]});

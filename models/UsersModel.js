@@ -23,7 +23,7 @@ UsersModel.getCollection = function () {
 UsersModel.login = function(userData, callback){
   var self = this;
   var UsersCollection = UsersModel.getCollection();
-  if(userData  && userData.accessToken){
+  if(userData && userData.accessToken){
     if(userData.type == 'google'){
       Fetch.getGoogleProfile(userData.accessToken,function(gglReponse){
         delete userData.accessToken;
@@ -88,8 +88,8 @@ UsersModel.login = function(userData, callback){
       });
     }
     
-  }
-  return callback({
+  } else {
+    return callback({
       msg:"Could not login please try again later",
       errors:
       [
@@ -100,6 +100,7 @@ UsersModel.login = function(userData, callback){
         }
       ]
     });
+  }
 };
 
 UsersModel.add = function(data, callback){

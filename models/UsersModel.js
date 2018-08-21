@@ -117,7 +117,9 @@ UsersModel.add = function(data, callback){
           self.updatePushToken(data);
         }
         delete rec.push_token;
-        
+        if(rec && rec.profile_picture && !rec.profile_picture.secure_url && data.profile_picture){
+          rec.profile_picture = data.profile_picture;
+        }
         Session.encode(rec,function(token){
           rec.token = token;
           //console.log(rec);

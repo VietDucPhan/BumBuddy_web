@@ -248,7 +248,7 @@ UsersModel.updateExistingDeviceID = function(userData, flag, callback){
   });
 }
 
-UsersModel.update = function(token,data, callback){
+UsersModel.update = function(token, data, callback){
   var Users = UsersModel.getCollection();
   if(token != null && token != undefined){
     Session.verify(token,function(err,userDataDecoded){

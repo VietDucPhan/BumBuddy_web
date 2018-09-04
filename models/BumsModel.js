@@ -25,7 +25,7 @@ BumsModel.findBumByText = function(data, callback){
   var Bums = BumsModel.getCollection();
   if(data && data != null && data != undefined){
     console.log("findBumByText",data);
-    Bums.find({name:{$search:data}}).project({name: 1, _id: 1 }).toArray(function(err,documents){
+    Bums.find({$text:{$search:data}}).project({name: 1, _id: 1 }).toArray(function(err,documents){
 
         if (documents == null) {
           console.log('BumsModel.getBum.err',err);

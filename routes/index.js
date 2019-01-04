@@ -5,17 +5,17 @@ var BumsModel = require('../models/BumsModel');
 /* GET home page. */
 router.get('/', function(req, res, next) {
   BumsModel.getAllBums(function(err, respond){
-    return res.render('index', { title: 'Express',jsonOutPut:JSON.stringify(respond) });
+    return res.render('index', { title: 'Bum Buddy',jsonOutPut:JSON.stringify({"data":respond}) });
   })
 
 });
 
 router.get('/privacy', function(req, res, next) {
-  return res.render('privacy', { title: 'Bum Buddy'});
+    return res.render('privacy', { title: 'Bum Buddy'});
 });
 
 router.get('/terms', function(req, res, next) {
-	return res.render('terms', { title: 'Bum Buddy'});
+    return res.render('terms', { title: 'Bum Buddy'});
 });
 
 module.exports = router;

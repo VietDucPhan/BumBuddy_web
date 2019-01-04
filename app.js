@@ -25,6 +25,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', routes);
 app.use('/api', api);
 
+app.use(function (req, res, next) {
+  // The 'x-forwarded-proto' check is for Heroku
+  if (!req.secure && req.get('x-forwarded-proto') !== 'https' && app.get('env') !== "development") {
+    return res.redirect('https://' + req.get('host') + req.url);
+  }
+  next();
+});
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   var err = new Error('Not Found');

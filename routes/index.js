@@ -5,7 +5,7 @@ var BumsModel = require('../models/BumsModel');
 /* GET home page. */
 router.get('/', function(req, res, next) {
   BumsModel.getAllBums(function(err, respond){
-    return res.render('index', { title: 'Bum Buddy',jsonOutPut:JSON.stringify({"data":respond}) });
+    return res.render('index', { title: 'Bum Buddy');
   })
 
 });

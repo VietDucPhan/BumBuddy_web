@@ -18,4 +18,8 @@ router.get('/terms', function(req, res, next) {
     return res.render('terms', { title: 'Bum Buddy'});
 });
 
+router.get('/open-source-libraries', function(req, res, next) {
+    return res.render('openSourceLibraries', { title: 'Bum Buddy'});
+});
+
 module.exports = router;

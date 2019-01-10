@@ -8,20 +8,22 @@ block content
           div.form-row
             div.form-group.col-sm
               label First name
-              input(type="text" required placeholder="First name")
+              input(type="text" required placeholder="First name").form-control
             div.form-group.col-sm
               label Last name
-              input(type="text" required placeholder="Last name")
+              input(type="text" required placeholder="Last name").form-control
           div.form-group
             label Email
-            input(type="email" required placeholder="Email")
+            input(type="email" required placeholder="Email").form-control
           div.form-group
             select(required).form-control
-              option(selected) Choose an option
-              option Reporting bug
-              option General feedback
+              option(selected value="") Choose an option
+              option(value="IOS") IOS
+              option(value="Android") Android
+              option(value="Web") Web
+              option(value="General feedback") General feedback
           div.form-group
             label Message
-            textarea(row="3" required).form-control
+            textarea(row="5" required).form-control
           div.form-group
             button(type="submit" class="btn btn-primary") Send

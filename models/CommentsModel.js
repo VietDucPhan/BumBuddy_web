@@ -348,74 +348,77 @@ CommentsModel.getComment = function(_id, callback){
 }
 
 CommentsModel.getComments = function(data, callback){
-    var Comments = CommentsModel.getCollection();
-    console.log("getBumsComments.data",data);
-    var aggregateObject = [
-      {$unwind:{
-        path:"$votes",
-        preserveNullAndEmptyArrays:true
-      }},
-      {$group:{
-        _id:"$_id",
-        bum_id:{$first:"$bum._id"},
-        name:{$first:"$bum.name"},
-        address:{$first:"$bum.address"},
-        media:{$first:"$media"},
-        description:{$first:"$description"},
-        overall_rating:{$first:"$overall_rating"},
-        bum_rating:{$first:"$bum_rating"},
-        created_by:{$first:"$created_by"},
-        created_date:{$first:"$created_date"},
-        points:{$sum:{ $ifNull: [ "$votes.vote", 0 ] }},
-        upVote:{$addToSet:{$cond:[{$eq:["$votes.vote",1]},"$votes.created_by.email",null]}},
-        downVote:{$addToSet:{$cond:[{$eq:["$votes.vote",-1]},"$votes.created_by.email",null]}}
-      }},
-      {$project:{
-        name:1,
-        media:1,
-        address:1,
-        bum_id:1,
-        description:1,
-        overall_rating:1,
-        bum_rating:1,
-        created_by:1,
-        created_date:1,
-        points:1,
-        upVote:1,
-        downVote:1
-      }},
-      {$sort: {_id: -1} },
-      {$skip:data.skip},
-      {$limit: data.limit}
-    ];
+  var Comments = CommentsModel.getCollection();
+  console.log("getBumsComments.data",data);
+  var aggregateObject = [
+    {$unwind:{
+      path:"$votes",
+      preserveNullAndEmptyArrays:true
+    }},
+    {$group:{
+      _id:"$_id",
+      bum_id:{$first:"$bum._id"},
+      name:{$first:"$bum.name"},
+      address:{$first:"$bum.address"},
+      media:{$first:"$media"},
+      description:{$first:"$description"},
+      overall_rating:{$first:"$overall_rating"},
+      bum_rating:{$first:"$bum_rating"},
+      created_by:{$first:"$created_by"},
+      created_date:{$first:"$created_date"},
+      points:{$sum:{ $ifNull: [ "$votes.vote", 0 ] }},
+      upVote:{$addToSet:{$cond:[{$eq:["$votes.vote",1]},"$votes.created_by.email",null]}},
+      downVote:{$addToSet:{$cond:[{$eq:["$votes.vote",-1]},"$votes.created_by.email",null]}}
+    }},
+    {$project:{
+      name:1,
+      media:1,
+      address:1,
+      bum_id:1,
+      description:1,
+      overall_rating:1,
+      bum_rating:1,
+      created_by:1,
+      created_date:1,
+      points:1,
+      upVote:1,
+      downVote:1
+    }},
+    {$sort: {_id: -1} },
+    {$skip:data.skip},
+    {$limit: data.limit}
+  ];
 
-    if(data.bum_id){
-      aggregateObject.unshift({$match:{"bum._id":data.bum_id}});
-    } else if(data.user_id){
-      aggregateObject.unshift({$match:{"created_by._id":data.user_id}});
-    }
-    Comments.aggregate(aggregateObject).toArray(function(err,documents){
-        console.log('BumsModel.getBum.err',err);
-        console.log('BumsModel.getBum.err',documents);
-        if (documents == null) {
-          return callback({
-            errors:
-            [
-              {
-                status:'s003',
-                source:{pointer:"models/BumsModel.getBum"},
-                title:"Bum not found",
-                detail:err.message
-              }
-            ]
-          });
-        } else {
-          console.log('BumsModel.getBum.documents',documents);
-            return callback({
-              data:documents
-            });
+  if(data.bum_id){
+    aggregateObject.unshift({$match:{"bum._id":data.bum_id}});
+  } else if(data.user_id){
+    aggregateObject.unshift({$match:{"created_by._id":data.user_id}});
+  }
+  Comments.aggregate(aggregateObject).toArray(function(err,documents){
+      //console.log('BumsModel.getBum.err',err);
+      //console.log('BumsModel.getBum.err',documents);
+      if (documents == null) {
+        return callback({
+          errors:
+          [
+            {
+              status:'s003',
+              source:{pointer:"models/BumsModel.getBum"},
+              title:"Bum not found",
+              detail:err.message
+            }
+          ]
+        });
+      } else {
+        //console.log('BumsModel.getBum.documents',documents);
+        if(data.skip != 0){
+          documents.unshift({admob:true,size:"SMART_BANNER"})
         }
-    });
+        return callback({
+          data:documents
+        });
+      }
+  });
 }
 
 

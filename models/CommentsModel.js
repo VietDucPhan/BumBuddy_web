@@ -411,8 +411,8 @@ CommentsModel.getComments = function(data, callback){
         });
       } else {
         //console.log('BumsModel.getBum.documents',documents);
-        if(data.skip != 0){
-          documents.unshift({admob:true,size:"SMART_BANNER"})
+        if(data.skip != 0 && documents.length != 0){
+          documents.unshift({admob:true, size:"MEDIUM_RECTANGLE"});
         }
         return callback({
           data:documents

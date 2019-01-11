@@ -412,7 +412,8 @@ CommentsModel.getComments = function(data, callback){
       } else {
         //console.log('BumsModel.getBum.documents',documents);
         if(data.skip != 0 && documents.length != 0){
-          documents.unshift({admob:true, size:"MEDIUM_RECTANGLE"});
+          //this is for displaying advertisement
+          //documents.unshift({admob:true, size:"MEDIUM_RECTANGLE"});
         }
         return callback({
           data:documents

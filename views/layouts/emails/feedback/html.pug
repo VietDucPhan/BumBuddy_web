@@ -1,0 +1,54 @@
+head
+  link(rel="stylesheet", href="/email.css", data-inline)
+body
+  table.head-wrap(bgcolor='#f1f1f1')
+    table.body-wrap
+      tbody
+        tr
+          td
+          td.container(bgcolor='#FFFFFF')
+            .content
+              table
+                tbody
+                  tr
+                    td
+                      h3 #{firstname} #{lastname}
+                      p #{message}
+                      br
+                      table.social(width='100%')
+                        tbody
+                          tr
+                            td
+                              table.column(align='left')
+                                tbody
+                                  tr
+                                    td
+                                      h5 Connect with Us:
+                                      p
+                                        a.soc-btn.fb(href='#') Facebook
+                                        a.soc-btn.tw(href='#') Twitter
+                                        a.soc-btn.gp(href='#') Google+
+                              table.column(align='left')
+                                tbody
+                                  tr
+                                    td
+                              span.clear
+          td
+    table.footer-wrap
+      tbody
+        tr
+          td
+          td.container
+            .content
+              table
+                tbody
+                  tr
+                    td(align='center')
+                      p
+                        a(href='#') Terms
+                        |  |
+                        a(href='#') Privacy
+                        |  |
+                        a(href='#')
+                          unsubscribe Unsubscribe
+          td

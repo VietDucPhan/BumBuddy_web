@@ -22,8 +22,4 @@ router.get('/open-source-libraries', function(req, res, next) {
     return res.render('openSourceLibraries', { title: 'Bum Buddy'});
 });
 
-router.get('/feedback', function(req, res, next) {
-    return res.render('feedback', { title: 'Bum Buddy'});
-});
-
 module.exports = router;
